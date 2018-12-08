@@ -1,0 +1,45 @@
+<resources>
+    <string name="app_name">MovieApp</string>
+
+    <string name="Logan_title">Logan</string>
+    <string name="Logan_overview">In the near future, a weary Logan cares for an ailing Professor X, somewhere on the Mexican border. However, Logan\'s attempts to hide from the world, and his legacy, are upended when a young mutant arrives, pursued by dark forces.</string>
+
+    <string name="starwars_title">Starwars: The Force Awakens</string>
+    <string name="starwars_overview">Three decades after the Empire\'s defeat, a new threat arises in the militant First Order. Stormtrooper defector Finn and the scavenger Rey are caught up in the Resistance\'s search for the missing Luke Skywalker.</string>
+
+    <string name="Deadpool_title">Deadpool</string>
+    <string name="deadpool_overview">A fast-talking mercenary with a morbid sense of humor is subjected to a rogue experiment that leaves him with accelerated healing powers and a quest for revenge.</string>
+
+    <string name="Spiderman_title">Spiderman: Home Coming</string>
+    <string name="spiderman_overview">Peter Parker balances his life as an ordinary high school student in Queens with his superhero alter-ego Spider-Man, and finds himself on the trail of a new menace prowling the skies of New York City.</string>
+
+    <string name="Avatar_title">Avatar</string>
+    <string name="avatar_overview">A paraplegic marine dispatched to the moon Pandora on a unique mission becomes torn between following his orders and protecting the world he feels is his home.</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="Logan_release">3/3/2017</string>
+    <string name="Logan_url">https://www.youtube.com/watch?v=Div0iP65aZo</string>
+    <string name="starwars_release">18/12/2015</string>
+    <string name="starwars_url">https://www.youtube.com/watch?v=sGbxmsDFVnE</string>
+    <string name="deadpool_release">12/2/2016</string>
+    <string name="deadpool_url">https://www.youtube.com/watch?v=FyKWUTwSYAs</string>
+    <string name="spiderman_release">7/6/2017</string>
+    <string name="spiderman_url">https://www.youtube.com/watch?v=n9DwoQ7HWvI</string>
+    <string name="avatar_release">18/12/2009</string>
+    <string name="avatar_url">https://www.youtube.com/watch?v=6ziBFh3V1aM</string>
+    <string name="watch_trailer">WATCH TRAILER</string>
+    <string name="async_task_title">Async Task Activity</string>
+    <string name="threads_handler_title">Threads Handler Activity</string>
+    <string name="credits">Created by Ofek Pintok (C)</string>
+    <string name="thread_start_msg">Create a new async task,\nthen start!</string>
+    <string name="thread_create">Create</string>
+    <string name="thread_start">Start</string>
+    <string name="thread_cancel">Cancel</string>
+    <string name="done_counting">Done!</string>
+    <string name="task_creating">Creating task</string>
+    <string name="task_create_first">Create task first</string>
+    <string name="task_no_tasks">No task to cancel</string>
+    <string name="task_canceled">task canceled!</string>
+    <string name="task_already_running">Task is already running</string>
+</resources>

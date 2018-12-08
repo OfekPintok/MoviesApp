@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Created by Ofek Pintok on 12/4/18 6:57 PM
+  ~ Copyright (c) 2018 . All rights reserved
+  ~ Last modified 12/4/18 6:57 PM
+  -->
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/asynctask_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+</FrameLayout>

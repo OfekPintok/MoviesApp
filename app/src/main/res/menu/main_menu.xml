@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Created by Ofek Pintok on 12/4/18 1:05 PM
+  ~ Copyright (c) 2018 . All rights reserved
+  ~ Last modified 12/4/18 1:05 PM
+  -->
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/async_task"
+        android:orderInCategory="100"
+        android:title="@string/async_task_title"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/threads_handler"
+        android:orderInCategory="200"
+        android:title="@string/threads_handler_title"
+        app:showAsAction="never"/>
+</menu>
