@@ -18,7 +18,6 @@ import com.ofek.movieapp.interfaces.IAsyncTaskEvents;
 
 public class AsyncTaskActivity extends AppCompatActivity implements IAsyncTaskEvents {
 
-    final public static String FRAG_KEY = "Thread_Fragment_Key";
     private ThreadFragment threadFragment;
     private CounterAsyncTask counterAsyncTask;
 
@@ -27,22 +26,19 @@ public class AsyncTaskActivity extends AppCompatActivity implements IAsyncTaskEv
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_asynctask);
 
-            // Create new threadFragment fragment
-            threadFragment = new ThreadFragment();
+        if (savedInstanceState == null) {
+        // Create new threadFragment fragment
+        threadFragment = new ThreadFragment();
 
-           // Bundle data = new Bundle();//Use bundle to pass data
-          //  data.putString("Test", getString(R.string.thread_start_msg));//put string, int, etc in bundle with a key value
-           // threadFragment.setArguments(data);//Finally set argument bundle to fragment
+        getSupportFragmentManager().
+                beginTransaction().
+                replace(R.id.asynctask_layout, threadFragment)
+                .commit();
 
-            getSupportFragmentManager().
-                    beginTransaction().
-                    replace(R.id.asynctask_layout, threadFragment, FRAG_KEY)
-                    .commit();
-
-        if (savedInstanceState != null) {
-            
+        } else {
             if(threadFragment == null) {
-                threadFragment = (ThreadFragment) getSupportFragmentManager().findFragmentById(R.id.asynctask_layout);
+                threadFragment =
+                        (ThreadFragment) getSupportFragmentManager().findFragmentById(R.id.asynctask_layout);
             }
             if (counterAsyncTask == null) {
                 counterAsyncTask = new CounterAsyncTask(this);
@@ -80,7 +76,7 @@ public class AsyncTaskActivity extends AppCompatActivity implements IAsyncTaskEv
     @Override
     public void startAsyncTaskI() {
         if (counterAsyncTask != null) {
-        counterAsyncTask.execute(10);
+        counterAsyncTask.execute(0);
         } else {
             Toast.makeText(this, getString(R.string.task_create_first), Toast.LENGTH_SHORT).show();
         }
@@ -156,17 +152,17 @@ public class AsyncTaskActivity extends AppCompatActivity implements IAsyncTaskEv
 
         @Override
         protected String doInBackground(Integer... integers) {
-            int length = 0;
+            int currentCount = 0;
             if (integers.length == 1) { // One digit
-                length = integers[0].intValue(); // Get value of the digit
+                currentCount = integers[0].intValue(); // Get value of the digit
             } else {
-                length = 10; // Max number to count is 10
+                currentCount = 10; // Max number to count is 10
             }
-            for (int i = 0; i <= length; i++) {
+            for (int length = 10; currentCount <= length; currentCount++) {
                 if(isCancelled()) {
                     return null;
                 }
-                publishProgress(i);
+                publishProgress(currentCount);
                 SystemClock.sleep(500);
             }
             return null;
