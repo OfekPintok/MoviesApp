@@ -44,13 +44,17 @@ public class ThreadFragment extends Fragment implements View.OnClickListener {
         startBtn.setOnClickListener(this);
         cancelBtn.setOnClickListener(this);
 
-       // Bundle bundle = this.getArguments();
-      //  if (bundle != null) {
-        //    String fragmentText = this.getArguments().getString("Test");
-         //   countTv.setText(fragmentText);
-      //  }
+        if(savedInstanceState != null) {
+            countTv.setText(String.valueOf(savedInstanceState.getInt("Test1")));
+        }
 
         return view;
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("Test1", countTv.getText().toString());
     }
 
     // When the fragment attach the activity
