@@ -1,7 +1,7 @@
 /*
- * Created by Ofek Pintok on 12/4/18 3:39 PM
+ * Created by Ofek Pintok on 12/9/18 11:17 AM
  * Copyright (c) 2018 . All rights reserved
- * Last modified 12/4/18 3:39 PM
+ * Last modified 12/9/18 7:40 AM
  */
 
 package com.ofek.movieapp.fragments;
@@ -26,6 +26,7 @@ public class ThreadFragment extends Fragment implements View.OnClickListener {
 
     private TextView countTv;
     private IAsyncTaskEvents iAsyncTaskEvents;
+    final private static String BUNDLE_CURRENT_COUNT = "BUNDLE_CURRENT_COUNT";
 
     public ThreadFragment () {
         // Required empty constructor
@@ -45,7 +46,8 @@ public class ThreadFragment extends Fragment implements View.OnClickListener {
         cancelBtn.setOnClickListener(this);
 
         if(savedInstanceState != null) {
-            countTv.setText(String.valueOf(savedInstanceState.getInt("Test1")));
+            String currentCount = savedInstanceState.getString(BUNDLE_CURRENT_COUNT);
+            countTv.setText(currentCount);
         }
 
         return view;
@@ -54,7 +56,8 @@ public class ThreadFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString("Test1", countTv.getText().toString());
+        String currentCount = countTv.getText().toString();
+        outState.putString(BUNDLE_CURRENT_COUNT, currentCount);
     }
 
     // When the fragment attach the activity
@@ -101,7 +104,7 @@ public class ThreadFragment extends Fragment implements View.OnClickListener {
     }
 
     public void updateTextView(String toUpdate) {
-        if (toUpdate != null) {
+        if (toUpdate != null && countTv != null) {
             countTv.setText(toUpdate);
         }
     }
