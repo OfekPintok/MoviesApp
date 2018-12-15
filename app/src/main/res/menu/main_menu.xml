@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Created by Ofek Pintok on 12/4/18 1:05 PM
+  ~ Created by Ofek Pintok on 12/15/18 11:55 PM
   ~ Copyright (c) 2018 . All rights reserved
-  ~ Last modified 12/4/18 1:05 PM
+  ~ Last modified 12/15/18 10:59 AM
   -->
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
@@ -18,5 +18,11 @@
         android:id="@+id/threads_handler"
         android:orderInCategory="200"
         android:title="@string/threads_handler_title"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/background_services"
+        android:orderInCategory="300"
+        android:title="@string/title_background_services"
         app:showAsAction="never"/>
 </menu>

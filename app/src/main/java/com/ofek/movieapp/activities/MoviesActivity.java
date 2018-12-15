@@ -1,8 +1,8 @@
 
 /*
- * Created by Ofek Pintok on 12/1/18 8:28 PM
+ * Created by Ofek Pintok on 12/15/18 11:55 PM
  * Copyright (c) 2018 . All rights reserved
- * Last modified 12/1/18 8:14 PM
+ * Last modified 12/15/18 11:02 AM
  */
 
 package com.ofek.movieapp.activities;
@@ -23,6 +23,7 @@ import com.ofek.movieapp.interfaces.MovieClickListener;
 import com.ofek.movieapp.models.MovieModel;
 import com.ofek.movieapp.adapters.MoviesAdapter;
 import com.ofek.movieapp.R;
+import com.ofek.movieapp.services.BackgroundServicesActivity;
 import com.ofek.movieapp.threads.AsyncTaskActivity;
 import com.ofek.movieapp.threads.ThreadsHandlerActivity;
 
@@ -44,7 +45,6 @@ public class MoviesActivity extends AppCompatActivity implements MovieClickListe
         Toolbar myToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(myToolbar);
 
-
             mRecyclerView = findViewById(R.id.movie_RecyclerView);
 
             if(savedInstanceState == null) {
@@ -56,7 +56,6 @@ public class MoviesActivity extends AppCompatActivity implements MovieClickListe
             mRecyclerView.setHasFixedSize(true);
             moviesAdapter = new MoviesAdapter(MOVIES_LIST, this, this);
             mRecyclerView.setAdapter(moviesAdapter);
-
     }
 
     @Override
@@ -69,13 +68,18 @@ public class MoviesActivity extends AppCompatActivity implements MovieClickListe
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
 
-        if (itemId == R.id.async_task) {
+        if(itemId == R.id.async_task) {
             Intent intent = new Intent(this, AsyncTaskActivity.class);
             startActivity(intent);
         }
 
-        if (itemId == R.id.threads_handler) {
+        if(itemId == R.id.threads_handler) {
             Intent intent = new Intent (this, ThreadsHandlerActivity.class);
+            startActivity(intent);
+        }
+
+        if(itemId == R.id.background_services) {
+            Intent intent = new Intent(this, BackgroundServicesActivity.class);
             startActivity(intent);
         }
 
