@@ -1,7 +1,7 @@
 /*
- * Created by Ofek Pintok on 12/4/18 1:03 PM
+ * Created by Ofek Pintok on 12/15/18 2:12 PM
  * Copyright (c) 2018 . All rights reserved
- * Last modified 12/4/18 1:03 PM
+ * Last modified 12/14/18 11:18 PM
  */
 
 package com.ofek.movieapp.threads;
@@ -20,6 +20,7 @@ public class AsyncTaskActivity extends AppCompatActivity implements IAsyncTaskEv
 
     private ThreadFragment threadFragment;
     private CounterAsyncTask counterAsyncTask;
+    final static private String BUNDLE_CURRENT_COUNT = "BUNDLE_CURRENT_COUNT";
 
     @Override
     public void onCreate (Bundle savedInstanceState) {
@@ -44,11 +45,11 @@ public class AsyncTaskActivity extends AppCompatActivity implements IAsyncTaskEv
                 counterAsyncTask = new CounterAsyncTask(this);
             }
 
-            String currentS = savedInstanceState.getString("Test");
+            String currentS = savedInstanceState.getString(BUNDLE_CURRENT_COUNT);
             if (currentS != null) {
-                if (currentS.equals(getString(R.string.done_counting))) {
+                if (currentS.equals(getString(R.string.done_counting)) || currentS.equals(getString(R.string.thread_start_msg))) {
                     threadFragment.updateTextView(currentS);
-                } else {
+                    } else {
                     counterAsyncTask.execute(Integer.valueOf(currentS));
                 }
             }
@@ -58,7 +59,7 @@ public class AsyncTaskActivity extends AppCompatActivity implements IAsyncTaskEv
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString("Test", threadFragment.getCountString());
+        outState.putString(BUNDLE_CURRENT_COUNT, threadFragment.getCountString());
     }
 
     // When clicking on Create
@@ -108,9 +109,12 @@ public class AsyncTaskActivity extends AppCompatActivity implements IAsyncTaskEv
     // After executing the task
     @Override
     public void onPostExecuteI() {
-        threadFragment.updateTextView(getString(R.string.done_counting));
-        if (!counterAsyncTask.isCancelled()) {
-            counterAsyncTask = new CounterAsyncTask(this);
+        if(counterAsyncTask != null) {
+            if (!counterAsyncTask.isCancelled()) {
+                counterAsyncTask = new CounterAsyncTask(this);
+            } else {
+                threadFragment.updateTextView(getString(R.string.done_counting));
+            }
         }
     }
 
