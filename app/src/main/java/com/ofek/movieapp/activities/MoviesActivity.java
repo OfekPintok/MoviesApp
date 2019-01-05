@@ -1,42 +1,48 @@
 
 /*
- * Created by Ofek Pintok on 12/15/18 11:55 PM
- * Copyright (c) 2018 . All rights reserved
- * Last modified 12/15/18 11:02 AM
+ * Created by Ofek Pintok on 1/5/19 7:40 PM
+ * Copyright (c) 2019 . All rights reserved
+ * Last modified 1/5/19 4:49 PM
  */
 
 package com.ofek.movieapp.activities;
 
 import android.content.Intent;
-import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.ContextMenu;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
+import com.ofek.movieapp.network.RestClient;
 import com.ofek.movieapp.interfaces.MovieClickListener;
-import com.ofek.movieapp.models.MovieModel;
 import com.ofek.movieapp.adapters.MoviesAdapter;
 import com.ofek.movieapp.R;
+import com.ofek.movieapp.models.MoviesListResponse;
+import com.ofek.movieapp.network.ResponseConverter;
 import com.ofek.movieapp.services.BackgroundServicesActivity;
 import com.ofek.movieapp.threads.AsyncTaskActivity;
 import com.ofek.movieapp.threads.ThreadsHandlerActivity;
 
-import java.util.ArrayList;
-import java.util.List;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static com.ofek.movieapp.activities.DetailsActivity.EXTRA_ITEM_POSITION;
+import static com.ofek.movieapp.models.MovieList.sMovieList;
 
 public class MoviesActivity extends AppCompatActivity implements MovieClickListener {
 
-    public static final List<MovieModel> MOVIES_LIST = new ArrayList<>();
     private MoviesAdapter moviesAdapter;
     private RecyclerView mRecyclerView;
+    private View progressBar;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,18 +50,20 @@ public class MoviesActivity extends AppCompatActivity implements MovieClickListe
         setContentView(R.layout.activity_movies);
         Toolbar myToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(myToolbar);
+        progressBar = findViewById(R.id.main_progress);
 
-            mRecyclerView = findViewById(R.id.movie_RecyclerView);
+        //Initialize RecyclerView
+        mRecyclerView = findViewById(R.id.movie_RecyclerView);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.setHasFixedSize(true);
 
-            if(savedInstanceState == null) {
-                loadMovies(MOVIES_LIST);
-            }
-
-            //Initialize RecyclerView
-            mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-            mRecyclerView.setHasFixedSize(true);
-            moviesAdapter = new MoviesAdapter(MOVIES_LIST, this, this);
+        if (savedInstanceState == null) {
+            loadMovies();
+        } else {
+            moviesAdapter = new MoviesAdapter(sMovieList, this, this);
             mRecyclerView.setAdapter(moviesAdapter);
+        }
+
     }
 
     @Override
@@ -68,17 +76,17 @@ public class MoviesActivity extends AppCompatActivity implements MovieClickListe
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
 
-        if(itemId == R.id.async_task) {
+        if (itemId == R.id.async_task) {
             Intent intent = new Intent(this, AsyncTaskActivity.class);
             startActivity(intent);
         }
 
-        if(itemId == R.id.threads_handler) {
-            Intent intent = new Intent (this, ThreadsHandlerActivity.class);
+        if (itemId == R.id.threads_handler) {
+            Intent intent = new Intent(this, ThreadsHandlerActivity.class);
             startActivity(intent);
         }
 
-        if(itemId == R.id.background_services) {
+        if (itemId == R.id.background_services) {
             Intent intent = new Intent(this, BackgroundServicesActivity.class);
             startActivity(intent);
         }
@@ -86,51 +94,55 @@ public class MoviesActivity extends AppCompatActivity implements MovieClickListe
         return super.onOptionsItemSelected(item);
     }
 
-        @Override
+    @Override
     public void onMovieClicked(int itemPosition) {
-        if(itemPosition < 0) return;
-        MovieModel movie = MOVIES_LIST.get(itemPosition);
-        if(movie == null || movie.getmTitle().isEmpty()) return;
+        if (itemPosition < 0) return;
 
-        Intent intent = new Intent (this, DetailsActivity.class);
+        Intent intent = new Intent(this, DetailsActivity.class);
         intent.putExtra(EXTRA_ITEM_POSITION, itemPosition);
         startActivity(intent);
     }
 
-    private void loadMovies(List<MovieModel> movieModel) {
-        movieModel.add(new MovieModel
-                (getString(R.string.Logan_title),
-                        getString(R.string.Logan_overview),
-                        getString(R.string.Logan_release),
-                        getString(R.string.Logan_url),
-                        R.drawable.a));
+    private void loadMovies() {
+        progressBar.setVisibility(View.VISIBLE);
 
-        movieModel.add(new MovieModel
-                (getString(R.string.starwars_title),
-                        getString(R.string.starwars_overview),
-                        getString(R.string.starwars_release),
-                        getString(R.string.starwars_url),
-                        R.drawable.b));
+        // Create a call that gets the popular movies from the API
+        Call<MoviesListResponse> call = RestClient.getMoviesService().searchPopularMovies();
 
-        movieModel.add(new MovieModel
-                (getString(R.string.Deadpool_title),
-                        getString(R.string.deadpool_overview),
-                        getString(R.string.deadpool_release),
-                        getString(R.string.deadpool_url),
-                        R.drawable.c));
+        // Reset all the data that the static movie list holds
+        sMovieList.clear();
 
-        movieModel.add(new MovieModel
-                (getString(R.string.Spiderman_title),
-                        getString(R.string.spiderman_overview),
-                        getString(R.string.spiderman_release),
-                        getString(R.string.spiderman_url),
-                        R.drawable.d));
+        // Enqueue the call
+        call.enqueue(new Callback<MoviesListResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<MoviesListResponse> call,
+                                   @NonNull Response<MoviesListResponse> response) {
+                progressBar.setVisibility(View.GONE);
+                if (response.isSuccessful()) {
+                    if (response.body() != null) {
+                        // Add all the converted results into the list
+                        sMovieList.addAll(ResponseConverter.movieResponseConvert(response.body()));
+                        // Create and set the adapter with the current list
+                        moviesAdapter =
+                                new MoviesAdapter(sMovieList, MoviesActivity.this, MoviesActivity.this);
+                        mRecyclerView.setAdapter(moviesAdapter);
+                    } else {
+                        Toast.makeText(MoviesActivity.this,
+                                getString(R.string.no_data_in_response),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
 
-        movieModel.add(new MovieModel
-                (getString(R.string.Avatar_title),
-                        getString(R.string.avatar_overview),
-                        getString(R.string.avatar_release),
-                        getString(R.string.avatar_url),
-                        R.drawable.e));
+            @Override
+            public void onFailure(@NonNull Call<MoviesListResponse> call, @NonNull Throwable t) {
+                progressBar.setVisibility(View.GONE);
+                Log.i("failure", "network failure");
+                Toast.makeText(MoviesActivity.this,
+                        getString(R.string.network_error),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 }

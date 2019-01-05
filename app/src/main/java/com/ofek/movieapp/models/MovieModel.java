@@ -1,41 +1,57 @@
 
 
 /*
- * Created by Ofek Pintok on 12/1/18 8:29 PM
- * Copyright (c) 2018 . All rights reserved
- * Last modified 12/1/18 8:29 PM
+ * Created by Ofek Pintok on 1/5/19 7:40 PM
+ * Copyright (c) 2019 . All rights reserved
+ * Last modified 1/5/19 4:36 PM
  */
 
 package com.ofek.movieapp.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.DrawableRes;
 
 public class MovieModel implements Parcelable {
 
+    private int mMovieId;
     private String mTitle;
     private String mOverview;
     private String mReleaseDate;
-    private String mTrailerUrl;
-    @DrawableRes
-    private int mImageRes;
+    private String mImageUrl;
+    private String mBackImageUrl;
 
-    public MovieModel(String title, String overview, String releaseDate, String trailerUrl,
-                      @DrawableRes int imageRes) {
+    public MovieModel(int movieId, String title, String overview, String releaseDate,
+                      String mImageUrl, String mBackImageUrl) {
+        this.mMovieId = movieId;
         this.mTitle = title;
         this.mOverview = overview;
-        this.mImageRes = imageRes;
+        this.mImageUrl = mImageUrl;
         this.mReleaseDate = releaseDate;
-        this.mTrailerUrl = trailerUrl;
+        this.mBackImageUrl = mBackImageUrl;
     }
 
     protected MovieModel(Parcel in) {
+        mMovieId = in.readInt();
         mTitle = in.readString();
         mOverview = in.readString();
         mReleaseDate = in.readString();
-        mTrailerUrl = in.readString();
-        mImageRes = in.readInt();
+        mImageUrl = in.readString();
+        mBackImageUrl = in.readString();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mMovieId);
+        dest.writeString(mTitle);
+        dest.writeString(mOverview);
+        dest.writeString(mReleaseDate);
+        dest.writeString(mImageUrl);
+        dest.writeString(mBackImageUrl);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public static final Creator<MovieModel> CREATOR = new Creator<MovieModel>() {
@@ -50,42 +66,32 @@ public class MovieModel implements Parcelable {
         }
     };
 
-    public String getmTitle() {
+    public int getMovieId() {
+        return mMovieId;
+    }
+
+    public String getTitle() {
         return mTitle;
     }
 
-    public String getmOverview() {
+    public void setTitle(String mTitle) {
+        this.mTitle = mTitle;
+    }
+
+    public String getOverview() {
         return mOverview;
     }
 
-    public int getmImageRes() {
-        return mImageRes;
-    }
-
-
-    public String getmReleaseDate() {
+    public String getReleaseDate() {
         return mReleaseDate;
     }
 
-    public String getmTrailerUrl() {
-        return mTrailerUrl;
+    public String getImageUrl() {
+        return mImageUrl;
     }
 
-    public static Creator<MovieModel> getCREATOR() {
-        return CREATOR;
+    public String getmBackImageUrl() {
+        return mBackImageUrl;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(mTitle);
-        parcel.writeString(mOverview);
-        parcel.writeString(mReleaseDate);
-        parcel.writeString(mTrailerUrl);
-        parcel.writeInt(mImageRes);
-    }
 }

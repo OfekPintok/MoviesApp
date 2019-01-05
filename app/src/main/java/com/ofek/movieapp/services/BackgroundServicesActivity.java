@@ -1,7 +1,7 @@
 /*
- * Created by Ofek Pintok on 12/15/18 11:56 PM
- * Copyright (c) 2018 . All rights reserved
- * Last modified 12/15/18 11:46 PM
+ * Created by Ofek Pintok on 1/5/19 7:40 PM
+ * Copyright (c) 2019 . All rights reserved
+ * Last modified 12/17/18 7:48 PM
  */
 
 package com.ofek.movieapp.services;
@@ -83,6 +83,7 @@ public class BackgroundServicesActivity extends AppCompatActivity implements Vie
         subscribeForProgressUpdate();
     }
 
+
     @Override
     protected void onPause() {
         if(mBackgroundProgressReceiver != null) {
@@ -118,7 +119,7 @@ public class BackgroundServicesActivity extends AppCompatActivity implements Vie
 
             if (progress >= 0) {
                 if (progress == 100) {
-                    text = "Done!";
+                    text = getString(R.string.Done);
                     mIsIntentServiceStarted = false;
                     mIsServiceStarted = false;
                 } else {

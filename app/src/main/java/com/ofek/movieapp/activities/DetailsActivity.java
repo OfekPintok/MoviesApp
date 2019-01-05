@@ -1,7 +1,7 @@
 /*
- * Created by Ofek Pintok on 12/1/18 8:28 PM
- * Copyright (c) 2018 . All rights reserved
- * Last modified 12/1/18 8:19 PM
+ * Created by Ofek Pintok on 1/5/19 7:40 PM
+ * Copyright (c) 2019 . All rights reserved
+ * Last modified 1/5/19 12:25 AM
  */
 
 package com.ofek.movieapp.activities;
@@ -16,6 +16,8 @@ import android.support.v7.app.AppCompatActivity;
 import com.ofek.movieapp.models.MovieModel;
 import com.ofek.movieapp.fragments.MoviesDetailsFragment;
 import com.ofek.movieapp.R;
+
+import static com.ofek.movieapp.models.MovieList.sMovieList;
 
 // This activity hosts the fragments
 public class DetailsActivity extends AppCompatActivity {
@@ -32,6 +34,7 @@ public class DetailsActivity extends AppCompatActivity {
             mViewPager.setAdapter(new DetailsViewPagerAdapter(getSupportFragmentManager()));
 
             int itemPosition = getIntent().getIntExtra(EXTRA_ITEM_POSITION, 0);
+
             mViewPager.setCurrentItem(itemPosition, false);
     }
 
@@ -55,13 +58,13 @@ public class DetailsActivity extends AppCompatActivity {
 
         @Override
         public Fragment getItem(int i) {
-            MovieModel movieModel = MoviesActivity.MOVIES_LIST.get(i);
+            MovieModel movieModel = sMovieList.get(i);
             return MoviesDetailsFragment.newInstance(movieModel);
         }
 
         @Override
         public int getCount() {
-            return MoviesActivity.MOVIES_LIST.size();
+            return sMovieList.size();
         }
     }
 

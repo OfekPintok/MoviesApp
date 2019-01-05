@@ -1,7 +1,7 @@
 <!--
-  ~ Created by Ofek Pintok on 12/15/18 11:55 PM
-  ~ Copyright (c) 2018 . All rights reserved
-  ~ Last modified 12/15/18 11:53 PM
+  ~ Created by Ofek Pintok on 1/5/19 7:40 PM
+  ~ Copyright (c) 2019 . All rights reserved
+  ~ Last modified 1/4/19 4:43 PM
   -->
 
 <resources>
@@ -56,4 +56,7 @@
     <string name="start_service_button">Start Service</string>
     <string name="progress">PROGRESS</string>
     <string name="start_intentservice_button">Start\nIntentService</string>
+    <string name="Done">Done!</string>
+    <string name="network_error">Please check your internet connection</string>
+    <string name="no_data_in_response">Nothing to show ATM..</string>
 </resources>

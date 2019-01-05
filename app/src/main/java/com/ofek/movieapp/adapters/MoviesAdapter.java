@@ -1,7 +1,7 @@
 /*
- * Created by Ofek Pintok on 12/1/18 8:29 PM
- * Copyright (c) 2018 . All rights reserved
- * Last modified 12/1/18 4:36 PM
+ * Created by Ofek Pintok on 1/5/19 7:40 PM
+ * Copyright (c) 2019 . All rights reserved
+ * Last modified 1/4/19 5:22 PM
  */
 
 package com.ofek.movieapp.adapters;
@@ -11,6 +11,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,8 @@ import android.widget.TextView;
 import com.ofek.movieapp.R;
 import com.ofek.movieapp.interfaces.MovieClickListener;
 import com.ofek.movieapp.models.MovieModel;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -28,12 +31,30 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
     private List<MovieModel> mList;
     private LayoutInflater mInfalter;
     private MovieClickListener mMovieClickListener;
+    private Picasso picasso;
 
     public MoviesAdapter (List<MovieModel> list, MovieClickListener listener , Context context) {
         this.mList = list;
         mMovieClickListener = listener;
         mInfalter = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        picasso = Picasso.get();
     }
+
+    protected MoviesAdapter(Parcel in) {
+        mList = in.createTypedArrayList(MovieModel.CREATOR);
+    }
+
+    public static final Creator<MoviesAdapter> CREATOR = new Creator<MoviesAdapter>() {
+        @Override
+        public MoviesAdapter createFromParcel(Parcel in) {
+            return new MoviesAdapter(in);
+        }
+
+        @Override
+        public MoviesAdapter[] newArray(int size) {
+            return new MoviesAdapter[size];
+        }
+    };
 
     @NonNull
     @Override
@@ -44,8 +65,8 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull MoviesAdapter.ViewHolder viewHolder, int i) {
-        //viewHolder is the "row" in the Recycler view
-    viewHolder.bind(mList.get(i));
+        //viewHolder holds a single line in the Recycler view
+          viewHolder.bind(mList.get(i));
     }
 
     @Override
@@ -60,7 +81,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-
+        parcel.writeTypedList(mList);
     }
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -71,7 +92,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            // Hold the elements of the movies row in the Recycler view
+            // Hold the elements of each movie in the Recycler view
             movieImage = itemView.findViewById(R.id.movie_image);
             titleTv = itemView.findViewById(R.id.movie_title);
             overviewTv = itemView.findViewById(R.id.movie_overview);
@@ -80,9 +101,20 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
 
         public void bind(MovieModel movieModel) {
             // Set the data inside the fields
-            movieImage.setImageResource(movieModel.getmImageRes());
-            titleTv.setText(movieModel.getmTitle());
-            overviewTv.setText(movieModel.getmOverview());
+            picasso.load(movieModel.getImageUrl())
+                    .into(movieImage, new Callback() {
+                        @Override
+                        public void onSuccess() {
+                            Log.i("onSuccess", "image loaded");
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            Log.d("onError", "onError() called with: e = [" + e + "]");
+                        }
+                    });
+            titleTv.setText(movieModel.getTitle());
+            overviewTv.setText(movieModel.getOverview());
         }
 
         @Override

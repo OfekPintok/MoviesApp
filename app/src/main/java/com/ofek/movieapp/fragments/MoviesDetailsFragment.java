@@ -1,7 +1,7 @@
 /*
- * Created by Ofek Pintok on 12/1/18 8:29 PM
- * Copyright (c) 2018 . All rights reserved
- * Last modified 12/1/18 7:44 PM
+ * Created by Ofek Pintok on 1/5/19 7:40 PM
+ * Copyright (c) 2019 . All rights reserved
+ * Last modified 1/5/19 5:13 PM
  */
 
 package com.ofek.movieapp.fragments;
@@ -12,15 +12,26 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.ofek.movieapp.R;
 import com.ofek.movieapp.models.MovieModel;
+import com.ofek.movieapp.network.ResponseConverter;
+import com.ofek.movieapp.network.RestClient;
+import com.ofek.movieapp.models.VideosListResponse;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
+
+import retrofit2.Call;
+import retrofit2.Response;
 
 public class MoviesDetailsFragment extends Fragment implements View.OnClickListener {
 
@@ -30,7 +41,8 @@ public class MoviesDetailsFragment extends Fragment implements View.OnClickListe
     private TextView mTitle;
     private TextView mReleaseDate;
     private TextView mOverview;
-    private ImageView mImageRes;
+    private ImageView mBackImage;
+    private View progressBar;
 
     public MoviesDetailsFragment() {
 
@@ -68,7 +80,8 @@ public class MoviesDetailsFragment extends Fragment implements View.OnClickListe
         mTitle = view.findViewById(R.id.fragment_title);
         mReleaseDate = view.findViewById(R.id.fragment_release_date);
         mOverview = view.findViewById(R.id.fragment_overview);
-        mImageRes = view.findViewById(R.id.fragment_imageView);
+        mBackImage = view.findViewById(R.id.fragment_imageView);
+        progressBar = view.findViewById(R.id.fragment_progressBar);
 
         Button mTrailerBtn = view.findViewById(R.id.fragment_button);
         mTrailerBtn.setOnClickListener(this);
@@ -78,20 +91,59 @@ public class MoviesDetailsFragment extends Fragment implements View.OnClickListe
 
     @Override
     public void onClick(View view) {
-    if(mMovieModel == null) return;
+        progressBar.setVisibility(View.VISIBLE);
+        if(mMovieModel == null) return;
 
-    String url = mMovieModel.getmTrailerUrl();
-    if(url.isEmpty()) return;
+    Call<VideosListResponse> videoResponse =
+            RestClient.getMoviesService().getVideos(mMovieModel.getMovieId());
 
-    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-    startActivity(browserIntent);
+    videoResponse.enqueue(new retrofit2.Callback<VideosListResponse>() {
+        @Override
+        public void onResponse(@NonNull Call<VideosListResponse> call,
+                               @NonNull Response<VideosListResponse> response) {
+            progressBar.setVisibility(View.GONE);
+            if (response.isSuccessful()) {
+                if (response.body() != null) {
+                    // Convert the response and get the video URL
+                    String trailerUrl = ResponseConverter.getTrailerUrl(response.body());
+                    Intent browser = new Intent(Intent.ACTION_VIEW, Uri.parse(trailerUrl));
+                    startActivity(browser);
+                } else {
+                    // Response is successful but doesn't contain any data
+                    Toast.makeText(getContext(),
+                            getString(R.string.no_data_in_response),
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
 
+        @Override
+        public void onFailure(Call<VideosListResponse> call, Throwable t) {
+            progressBar.setVisibility(View.GONE);
+            Toast.makeText(getContext(),
+                        getString(R.string.network_error),
+                        Toast.LENGTH_SHORT).show();
+        }
+    });
     }
 
     public void setMovieDetails (MovieModel movieModel) {
-        mTitle.setText(movieModel.getmTitle());
-        mReleaseDate.setText(movieModel.getmReleaseDate());
-        mOverview.setText(movieModel.getmOverview());
-        mImageRes.setImageResource(movieModel.getmImageRes());
+        Picasso picasso = Picasso.get();
+        mTitle.setText(movieModel.getTitle());
+        mReleaseDate.setText(movieModel.getReleaseDate());
+        mOverview.setText(movieModel.getOverview());
+        picasso.load(movieModel.getmBackImageUrl())
+                .into(mBackImage, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        Log.i("onSuccess", "Back Image loaded");
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        Log.d("onError", "Can't load image: error ["+e+"]");
+                    }
+                });
     }
+
 }
