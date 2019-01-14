@@ -1,7 +1,7 @@
 /*
- * Created by Ofek Pintok on 1/5/19 7:40 PM
+ * Created by Ofek Pintok on 1/14/19 11:34 PM
  * Copyright (c) 2019 . All rights reserved
- * Last modified 1/5/19 12:25 AM
+ * Last modified 1/14/19 11:31 PM
  */
 
 package com.ofek.movieapp.activities;
@@ -17,6 +17,8 @@ import com.ofek.movieapp.models.MovieModel;
 import com.ofek.movieapp.fragments.MoviesDetailsFragment;
 import com.ofek.movieapp.R;
 
+import java.util.Stack;
+
 import static com.ofek.movieapp.models.MovieList.sMovieList;
 
 // This activity hosts the fragments
@@ -24,29 +26,53 @@ public class DetailsActivity extends AppCompatActivity {
 
     public static final String EXTRA_ITEM_POSITION = "extra.item-position";
     private ViewPager mViewPager;
+    private Stack<Integer> fragmentStack;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
 
-            mViewPager = findViewById(R.id.pager);
-            mViewPager.setAdapter(new DetailsViewPagerAdapter(getSupportFragmentManager()));
+        fragmentStack = new Stack<>();
+        mViewPager = findViewById(R.id.pager);
+        mViewPager.setAdapter(new DetailsViewPagerAdapter(getSupportFragmentManager()));
 
-            int itemPosition = getIntent().getIntExtra(EXTRA_ITEM_POSITION, 0);
+        int itemPosition = getIntent().getIntExtra(EXTRA_ITEM_POSITION, 0);
+        fragmentStack.push(itemPosition);
 
-            mViewPager.setCurrentItem(itemPosition, false);
+        mViewPager.setCurrentItem(itemPosition, false);
+
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int i, float v, int i1) {
+
+            }
+
+            @Override
+            public void onPageSelected(int i) {
+            fragmentStack.push(i);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int i) {
+
+            }
+        });
     }
 
     @Override
     public void onBackPressed() {
-        if (mViewPager.getCurrentItem() == 0) {
-            // If the user is currently looking at the first step, allow the system to handle the
+        // Pop out the currently watched fragment
+        if(fragmentStack.size() > 1) {
+            fragmentStack.pop();
+        }
+            // Set the previews item as the current item
+            mViewPager.setCurrentItem(fragmentStack.pop());
+        if (fragmentStack.isEmpty()) {
+            // If the stack is currently empty, allow the system to handle the
             // Back button. This calls finish() on this activity and pops the back stack.
             super.onBackPressed();
-        } else {
-            // Otherwise, select the previous step.
-            mViewPager.setCurrentItem(mViewPager.getCurrentItem() - 1);
         }
     }
 

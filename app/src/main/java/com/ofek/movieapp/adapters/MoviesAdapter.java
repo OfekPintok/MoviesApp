@@ -1,7 +1,7 @@
 /*
- * Created by Ofek Pintok on 1/5/19 7:40 PM
+ * Created by Ofek Pintok on 1/14/19 11:34 PM
  * Copyright (c) 2019 . All rights reserved
- * Last modified 1/4/19 5:22 PM
+ * Last modified 1/14/19 7:39 PM
  */
 
 package com.ofek.movieapp.adapters;
@@ -24,7 +24,10 @@ import com.ofek.movieapp.models.MovieModel;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import static com.ofek.movieapp.models.MovieList.sMovieList;
 
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder> implements Parcelable {
 
@@ -34,10 +37,16 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
     private Picasso picasso;
 
     public MoviesAdapter (List<MovieModel> list, MovieClickListener listener , Context context) {
-        this.mList = list;
+        mList = new ArrayList<>(list);
         mMovieClickListener = listener;
         mInfalter = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         picasso = Picasso.get();
+    }
+
+    public void setData (List <MovieModel> movies) {
+        mList.clear();
+        mList.addAll(movies);
+        notifyDataSetChanged();
     }
 
     protected MoviesAdapter(Parcel in) {

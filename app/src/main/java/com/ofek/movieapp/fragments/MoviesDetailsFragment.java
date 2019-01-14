@@ -1,29 +1,33 @@
 /*
- * Created by Ofek Pintok on 1/5/19 7:40 PM
+ * Created by Ofek Pintok on 1/14/19 11:34 PM
  * Copyright (c) 2019 . All rights reserved
- * Last modified 1/5/19 5:13 PM
+ * Last modified 1/14/19 7:41 PM
  */
 
 package com.ofek.movieapp.fragments;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ofek.movieapp.R;
+import com.ofek.movieapp.database.AppDatabase;
+import com.ofek.movieapp.interfaces.MoviesService;
 import com.ofek.movieapp.models.MovieModel;
+import com.ofek.movieapp.models.VideoModel;
 import com.ofek.movieapp.network.ResponseConverter;
 import com.ofek.movieapp.network.RestClient;
 import com.ofek.movieapp.models.VideosListResponse;
@@ -92,7 +96,20 @@ public class MoviesDetailsFragment extends Fragment implements View.OnClickListe
     @Override
     public void onClick(View view) {
         progressBar.setVisibility(View.VISIBLE);
-        if(mMovieModel == null) return;
+        if (mMovieModel == null) return;
+
+        FragmentActivity fragmentActivity = getActivity();
+        if (fragmentActivity == null) return;
+
+        final Context context = fragmentActivity.getApplicationContext();
+        if (context == null) return;
+
+        final VideoModel videoModel =
+                AppDatabase.getInstance(context).videoDao().getVideo(mMovieModel.getMovieId());
+        if (videoModel != null) {
+            playTrailer(videoModel.getKey());
+            return;
+        }
 
     Call<VideosListResponse> videoResponse =
             RestClient.getMoviesService().getVideos(mMovieModel.getMovieId());
@@ -101,13 +118,15 @@ public class MoviesDetailsFragment extends Fragment implements View.OnClickListe
         @Override
         public void onResponse(@NonNull Call<VideosListResponse> call,
                                @NonNull Response<VideosListResponse> response) {
-            progressBar.setVisibility(View.GONE);
             if (response.isSuccessful()) {
                 if (response.body() != null) {
                     // Convert the response and get the video URL
-                    String trailerUrl = ResponseConverter.getTrailerUrl(response.body());
-                    Intent browser = new Intent(Intent.ACTION_VIEW, Uri.parse(trailerUrl));
-                    startActivity(browser);
+                    VideoModel convertedVideoModel = ResponseConverter.getTrailerUrl(response.body());
+                    if (convertedVideoModel != null) {
+                        AppDatabase.getInstance(context).videoDao().insert(convertedVideoModel);
+                        playTrailer(convertedVideoModel.getKey());
+                    }
+
                 } else {
                     // Response is successful but doesn't contain any data
                     Toast.makeText(getContext(),
@@ -132,7 +151,7 @@ public class MoviesDetailsFragment extends Fragment implements View.OnClickListe
         mTitle.setText(movieModel.getTitle());
         mReleaseDate.setText(movieModel.getReleaseDate());
         mOverview.setText(movieModel.getOverview());
-        picasso.load(movieModel.getmBackImageUrl())
+        picasso.load(movieModel.getBackImageUrl())
                 .into(mBackImage, new Callback() {
                     @Override
                     public void onSuccess() {
@@ -144,6 +163,13 @@ public class MoviesDetailsFragment extends Fragment implements View.OnClickListe
                         Log.d("onError", "Can't load image: error ["+e+"]");
                     }
                 });
+    }
+
+    void playTrailer (String key) {
+        String trailerUrl = MoviesService.YOUTUBE_URL + key;
+        Intent browser = new Intent(Intent.ACTION_VIEW, Uri.parse(trailerUrl));
+        startActivity(browser);
+        progressBar.setVisibility(View.GONE);
     }
 
 }

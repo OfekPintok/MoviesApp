@@ -1,8 +1,8 @@
 
 /*
- * Created by Ofek Pintok on 1/5/19 7:40 PM
+ * Created by Ofek Pintok on 1/14/19 11:34 PM
  * Copyright (c) 2019 . All rights reserved
- * Last modified 1/5/19 4:49 PM
+ * Last modified 1/14/19 2:02 PM
  */
 
 package com.ofek.movieapp.activities;
@@ -20,6 +20,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.ofek.movieapp.database.AppDatabase;
+import com.ofek.movieapp.models.MovieModel;
 import com.ofek.movieapp.network.RestClient;
 import com.ofek.movieapp.interfaces.MovieClickListener;
 import com.ofek.movieapp.adapters.MoviesAdapter;
@@ -29,6 +31,8 @@ import com.ofek.movieapp.network.ResponseConverter;
 import com.ofek.movieapp.services.BackgroundServicesActivity;
 import com.ofek.movieapp.threads.AsyncTaskActivity;
 import com.ofek.movieapp.threads.ThreadsHandlerActivity;
+
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -106,11 +110,21 @@ public class MoviesActivity extends AppCompatActivity implements MovieClickListe
     private void loadMovies() {
         progressBar.setVisibility(View.VISIBLE);
 
+        // Erase the data of the static movie list
+        sMovieList.clear();
+
+        List<MovieModel> cachedMovies = AppDatabase.getInstance(this).movieDao().getAll();
+        if (cachedMovies != null) {
+            sMovieList.addAll(cachedMovies);
+        }
+
+        // Create and set the adapter with the current list
+        moviesAdapter =
+                new MoviesAdapter(sMovieList, MoviesActivity.this, MoviesActivity.this);
+        mRecyclerView.setAdapter(moviesAdapter);
+
         // Create a call that gets the popular movies from the API
         Call<MoviesListResponse> call = RestClient.getMoviesService().searchPopularMovies();
-
-        // Reset all the data that the static movie list holds
-        sMovieList.clear();
 
         // Enqueue the call
         call.enqueue(new Callback<MoviesListResponse>() {
@@ -122,10 +136,11 @@ public class MoviesActivity extends AppCompatActivity implements MovieClickListe
                     if (response.body() != null) {
                         // Add all the converted results into the list
                         sMovieList.addAll(ResponseConverter.movieResponseConvert(response.body()));
-                        // Create and set the adapter with the current list
-                        moviesAdapter =
-                                new MoviesAdapter(sMovieList, MoviesActivity.this, MoviesActivity.this);
-                        mRecyclerView.setAdapter(moviesAdapter);
+                        // Re-set the movie list
+                        moviesAdapter.setData(sMovieList);
+                        // Erase old data from db and replace it with the new one
+                        AppDatabase.getInstance(MoviesActivity.this).movieDao().deleteAll();
+                        AppDatabase.getInstance(MoviesActivity.this).movieDao().insertAll(sMovieList);
                     } else {
                         Toast.makeText(MoviesActivity.this,
                                 getString(R.string.no_data_in_response),

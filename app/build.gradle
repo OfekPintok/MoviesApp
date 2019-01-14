@@ -1,7 +1,7 @@
 /*
- * Created by Ofek Pintok on 1/5/19 7:40 PM
+ * Created by Ofek Pintok on 1/14/19 11:34 PM
  * Copyright (c) 2019 . All rights reserved
- * Last modified 1/4/19 5:09 PM
+ * Last modified 1/12/19 11:16 AM
  */
 
 apply plugin: 'com.android.application'
@@ -40,4 +40,8 @@ dependencies {
 
     // Add picasso
     implementation 'com.squareup.picasso:picasso:2.71828'
+
+    // Add Room
+    implementation "android.arch.persistence.room:runtime:1.0.0"
+    annotationProcessor "android.arch.persistence.room:compiler:1.0.0"
 }

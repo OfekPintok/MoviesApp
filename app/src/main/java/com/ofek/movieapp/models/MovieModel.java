@@ -1,29 +1,35 @@
 
 
 /*
- * Created by Ofek Pintok on 1/5/19 7:40 PM
+ * Created by Ofek Pintok on 1/14/19 11:34 PM
  * Copyright (c) 2019 . All rights reserved
- * Last modified 1/5/19 4:36 PM
+ * Last modified 1/14/19 6:56 PM
  */
 
 package com.ofek.movieapp.models;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+@Entity
 public class MovieModel implements Parcelable {
 
+    @PrimaryKey
     private int mMovieId;
     private String mTitle;
+    private double mPopularity;
     private String mOverview;
     private String mReleaseDate;
     private String mImageUrl;
     private String mBackImageUrl;
 
-    public MovieModel(int movieId, String title, String overview, String releaseDate,
+    public MovieModel(int movieId, String title, double popularity, String overview, String releaseDate,
                       String mImageUrl, String mBackImageUrl) {
         this.mMovieId = movieId;
         this.mTitle = title;
+        this.mPopularity = popularity;
         this.mOverview = overview;
         this.mImageUrl = mImageUrl;
         this.mReleaseDate = releaseDate;
@@ -78,6 +84,14 @@ public class MovieModel implements Parcelable {
         this.mTitle = mTitle;
     }
 
+    public double getPopularity() {
+        return mPopularity;
+    }
+
+    public void setPopularity(double popularity) {
+        this.mPopularity = popularity;
+    }
+
     public String getOverview() {
         return mOverview;
     }
@@ -90,7 +104,7 @@ public class MovieModel implements Parcelable {
         return mImageUrl;
     }
 
-    public String getmBackImageUrl() {
+    public String getBackImageUrl() {
         return mBackImageUrl;
     }
 
