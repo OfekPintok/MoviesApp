@@ -1,7 +1,7 @@
 /*
- * Created by Ofek Pintok on 1/14/19 11:34 PM
+ * Created by Ofek Pintok on 1/15/19 7:38 AM
  * Copyright (c) 2019 . All rights reserved
- * Last modified 1/14/19 11:31 PM
+ * Last modified 1/15/19 7:29 AM
  */
 
 package com.ofek.movieapp.activities;
@@ -67,7 +67,7 @@ public class DetailsActivity extends AppCompatActivity {
         if(fragmentStack.size() > 1) {
             fragmentStack.pop();
         }
-            // Set the previews item as the current item
+            // Set the previous item as the current item
             mViewPager.setCurrentItem(fragmentStack.pop());
         if (fragmentStack.isEmpty()) {
             // If the stack is currently empty, allow the system to handle the

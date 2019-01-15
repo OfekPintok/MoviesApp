@@ -1,7 +1,7 @@
 /*
- * Created by Ofek Pintok on 1/14/19 11:36 PM
+ * Created by Ofek Pintok on 1/15/19 7:38 AM
  * Copyright (c) 2019 . All rights reserved
- * Last modified 1/14/19 7:18 PM
+ * Last modified 1/15/19 7:25 AM
  */
 
 package com.ofek.movieapp.database;
@@ -24,10 +24,6 @@ public abstract class AppDatabase extends RoomDatabase {
 
     private static AppDatabase INSTANCE;
     public static final String DATABASE_NAME = "Movies";
-
-    //private AppDatabase() {
-
-    //}
 
     public abstract MovieDao movieDao();
 
