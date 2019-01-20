@@ -19,10 +19,11 @@ import com.ofek.movieapp.interfaces.VideoDao;
 import com.ofek.movieapp.models.MovieModel;
 import com.ofek.movieapp.models.VideoModel;
 
-@Database(entities = {MovieModel.class, VideoModel.class}, version = 1, exportSchema = false)
+@Database(entities = {MovieModel.class, VideoModel.class}, version = 2, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     private static AppDatabase INSTANCE;
+
     public static final String DATABASE_NAME = "Movies";
 
     public abstract MovieDao movieDao();
@@ -33,7 +34,6 @@ public abstract class AppDatabase extends RoomDatabase {
         if (INSTANCE == null) {
             INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                     AppDatabase.class, DATABASE_NAME)
-                    .allowMainThreadQueries()
                     .fallbackToDestructiveMigration()
                     .build();
         }
@@ -49,4 +49,5 @@ public abstract class AppDatabase extends RoomDatabase {
     protected InvalidationTracker createInvalidationTracker() {
         return null;
     }
+
 }

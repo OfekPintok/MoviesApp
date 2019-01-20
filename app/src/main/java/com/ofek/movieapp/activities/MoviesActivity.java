@@ -21,6 +21,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.ofek.movieapp.database.AppDatabase;
+import com.ofek.movieapp.database.DatabaseHelper;
 import com.ofek.movieapp.models.MovieModel;
 import com.ofek.movieapp.network.RestClient;
 import com.ofek.movieapp.interfaces.MovieClickListener;
@@ -113,7 +114,7 @@ public class MoviesActivity extends AppCompatActivity implements MovieClickListe
         // Erase the data of the static movie list
         sMovieList.clear();
 
-        List<MovieModel> cachedMovies = AppDatabase.getInstance(this).movieDao().getAll();
+        List<MovieModel> cachedMovies = DatabaseHelper.getDatabaseHelper(this).getAllMovies();
         if (cachedMovies != null) {
             sMovieList.addAll(cachedMovies);
         }
@@ -139,8 +140,8 @@ public class MoviesActivity extends AppCompatActivity implements MovieClickListe
                         // Re-set the movie list
                         moviesAdapter.setData(sMovieList);
                         // Erase old data from db and replace it with the new one
-                        AppDatabase.getInstance(MoviesActivity.this).movieDao().deleteAll();
-                        AppDatabase.getInstance(MoviesActivity.this).movieDao().insertAll(sMovieList);
+                        DatabaseHelper.getDatabaseHelper(MoviesActivity.this).deleteAllMovies();
+                        DatabaseHelper.getDatabaseHelper(MoviesActivity.this).insertAllMovies(sMovieList);
                     } else {
                         Toast.makeText(MoviesActivity.this,
                                 getString(R.string.no_data_in_response),

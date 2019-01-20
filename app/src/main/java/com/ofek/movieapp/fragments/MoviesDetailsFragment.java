@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import com.ofek.movieapp.R;
 import com.ofek.movieapp.database.AppDatabase;
+import com.ofek.movieapp.database.DatabaseHelper;
 import com.ofek.movieapp.interfaces.MoviesService;
 import com.ofek.movieapp.models.MovieModel;
 import com.ofek.movieapp.models.VideoModel;
@@ -105,7 +106,7 @@ public class MoviesDetailsFragment extends Fragment implements View.OnClickListe
         if (context == null) return;
 
         final VideoModel videoModel =
-                AppDatabase.getInstance(context).videoDao().getVideo(mMovieModel.getMovieId());
+                DatabaseHelper.getDatabaseHelper(context).getVideo(mMovieModel.getMovieId());
         if (videoModel != null) {
             playTrailer(videoModel.getKey());
             return;
@@ -123,7 +124,7 @@ public class MoviesDetailsFragment extends Fragment implements View.OnClickListe
                     // Convert the response and get the video URL
                     VideoModel convertedVideoModel = ResponseConverter.getTrailerUrl(response.body());
                     if (convertedVideoModel != null) {
-                        AppDatabase.getInstance(context).videoDao().insert(convertedVideoModel);
+                        DatabaseHelper.getDatabaseHelper(context).insertVideo(convertedVideoModel);
                         playTrailer(convertedVideoModel.getKey());
                     }
 
