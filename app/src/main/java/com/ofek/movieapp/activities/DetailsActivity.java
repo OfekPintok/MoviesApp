@@ -17,6 +17,7 @@ import com.ofek.movieapp.models.MovieModel;
 import com.ofek.movieapp.fragments.MoviesDetailsFragment;
 import com.ofek.movieapp.R;
 
+import java.util.ArrayList;
 import java.util.Stack;
 
 import static com.ofek.movieapp.models.MovieList.sMovieList;
@@ -25,6 +26,7 @@ import static com.ofek.movieapp.models.MovieList.sMovieList;
 public class DetailsActivity extends AppCompatActivity {
 
     public static final String EXTRA_ITEM_POSITION = "extra.item-position";
+    public static final String EXTRA_STACK_STATE = "extra.stack-state";
     private ViewPager mViewPager;
     private Stack<Integer> fragmentStack;
 
@@ -34,24 +36,37 @@ public class DetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
 
-        fragmentStack = new Stack<>();
         mViewPager = findViewById(R.id.pager);
         mViewPager.setAdapter(new DetailsViewPagerAdapter(getSupportFragmentManager()));
 
         int itemPosition = getIntent().getIntExtra(EXTRA_ITEM_POSITION, 0);
-        fragmentStack.push(itemPosition);
+
+        // Create a stack that saves the swipes order of the user, inside the ViewPager
+        fragmentStack = new Stack<>();
+
+        // Restore the destroyed stack, if was exist
+        if(savedInstanceState != null) {
+            int[] restoredScrollOrder = savedInstanceState.getIntArray(EXTRA_STACK_STATE);
+            if (restoredScrollOrder != null && fragmentStack.isEmpty()) {
+                for (int aRestoredScroll : restoredScrollOrder) {
+                    fragmentStack.push(aRestoredScroll);
+                }
+            }
+        } else {
+            fragmentStack.push(itemPosition);
+        }
+
 
         mViewPager.setCurrentItem(itemPosition, false);
 
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int i, float v, int i1) {
-
             }
 
             @Override
             public void onPageSelected(int i) {
-            fragmentStack.push(i);
+                fragmentStack.push(i);
             }
 
             @Override
@@ -59,6 +74,22 @@ public class DetailsActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        // We won't save the current position since it would be saved after the recreation
+        fragmentStack.pop();
+
+        int stackSize = fragmentStack.size();
+        int[] scrollOrder = new int[stackSize];
+
+        // Create the exactly same order of the stack inside an array
+        for(int i = stackSize-1; i > 0; i--) {
+            scrollOrder[i] = fragmentStack.pop();
+        }
+        outState.putIntArray(EXTRA_STACK_STATE, scrollOrder);
+        super.onSaveInstanceState(outState);
     }
 
     @Override

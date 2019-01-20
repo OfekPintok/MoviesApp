@@ -21,9 +21,6 @@ public class AppRepository {
 
     private MovieDao movieDao;
     private VideoDao videoDao;
-    private static VideoModel sVideoModel;
-    private static List<MovieModel> SMovieList;
-
 
     AppRepository (Context context) {
         AppDatabase db = AppDatabase.getInstance(context);
@@ -34,8 +31,11 @@ public class AppRepository {
     //QUERY FUNCTIONS
 
     public List<MovieModel> getAllMovies() {
-        new getAllMoviesAsyncTask(movieDao).execute();
-        return SMovieList;
+        getAllMoviesAsyncTask moviesAsyncTask = new getAllMoviesAsyncTask(movieDao);
+        moviesAsyncTask.execute();
+
+        // After background run is finished, return the received movies list.
+        return moviesAsyncTask.getMoviesListFromAsyncTask();
     }
 
     public void insertAllMovies(Collection<MovieModel> movies) {
@@ -45,8 +45,11 @@ public class AppRepository {
     public void deleteAllMovies() { new deleteAllMoviesAsyncTask(movieDao).execute(); }
 
     public VideoModel getVideo(Integer movieId) {
-        new getVideoAsyncTask(videoDao).execute(movieId);
-        return sVideoModel;
+        getVideoAsyncTask videoAsyncTask = new getVideoAsyncTask(videoDao);
+        videoAsyncTask.execute(movieId);
+
+        // After background run is finished, return the received video.
+        return videoAsyncTask.getVideoFromAsyncTask();
     }
 
     public void insertVideo(VideoModel videoModel){
@@ -56,23 +59,23 @@ public class AppRepository {
 
     //CLASSES
 
-    private static class getAllMoviesAsyncTask extends AsyncTask<Void, Void, List<MovieModel>> {
+    private static class getAllMoviesAsyncTask extends AsyncTask<Void, Void, Void> {
 
         MovieDao asyncMovieDao;
+        List<MovieModel> movieList;
 
         getAllMoviesAsyncTask(MovieDao movieDao) {
             asyncMovieDao = movieDao;
         }
 
         @Override
-        protected List<MovieModel> doInBackground(Void... voids) {
-            return asyncMovieDao.getAll();
+        protected Void doInBackground(Void... voids) {
+            movieList =  asyncMovieDao.getAll();
+            return null;
         }
 
-        @Override
-        protected void onPostExecute(List<MovieModel> movieModels) {
-            SMovieList = movieModels;
-            super.onPostExecute(movieModels);
+        public List<MovieModel> getMoviesListFromAsyncTask() {
+            return movieList;
         }
     }
 
@@ -108,24 +111,25 @@ public class AppRepository {
         }
     }
 
-    private static class getVideoAsyncTask extends AsyncTask<Integer, Void, VideoModel> {
+    private static class getVideoAsyncTask extends AsyncTask<Integer, Void, Void> {
 
         VideoDao asyncVideoDao;
+        VideoModel videoModel;
 
         getVideoAsyncTask(VideoDao videoDao) {
             asyncVideoDao = videoDao;
         }
 
         @Override
-        protected VideoModel doInBackground(Integer... movieId) {
-            return asyncVideoDao.getVideo(movieId[0]);
+        protected Void doInBackground(Integer... movieId) {
+            videoModel = asyncVideoDao.getVideo(movieId[0]);
+            return null;
         }
 
-        @Override
-        protected void onPostExecute(VideoModel videoModel) {
-            sVideoModel = videoModel;
-            super.onPostExecute(videoModel);
+        public VideoModel getVideoFromAsyncTask() {
+            return videoModel;
         }
+
     }
 
     private static class insertVideoAsyncTask extends AsyncTask<VideoModel, Void, Void> {

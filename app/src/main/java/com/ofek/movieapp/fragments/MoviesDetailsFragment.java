@@ -106,7 +106,7 @@ public class MoviesDetailsFragment extends Fragment implements View.OnClickListe
         if (context == null) return;
 
         final VideoModel videoModel =
-                DatabaseHelper.getDatabaseHelper(context).getVideo(mMovieModel.getMovieId());
+                DatabaseHelper.getDatabaseHelper(context).getVideo(mMovieModel.getMovieId());//????
         if (videoModel != null) {
             playTrailer(videoModel.getKey());
             return;
