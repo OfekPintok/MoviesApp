@@ -16,6 +16,7 @@ import com.ofek.movieapp.models.VideoModel;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class AppRepository {
 
@@ -32,9 +33,18 @@ public class AppRepository {
 
     public List<MovieModel> getAllMovies() {
         getAllMoviesAsyncTask moviesAsyncTask = new getAllMoviesAsyncTask(movieDao);
-        moviesAsyncTask.execute();
 
-        // After background run is finished, return the received movies list.
+        // .get waits til the task is finished, since pulling the list from db takes time
+        // and the list is needed asap
+        try {
+            moviesAsyncTask.execute().get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // After background task is finished, return the received movies list.
         return moviesAsyncTask.getMoviesListFromAsyncTask();
     }
 

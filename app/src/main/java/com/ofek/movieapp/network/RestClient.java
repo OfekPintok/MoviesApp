@@ -8,6 +8,14 @@ package com.ofek.movieapp.network;
 
 import com.ofek.movieapp.interfaces.MoviesService;
 
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.HttpUrl;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -16,12 +24,36 @@ import static com.ofek.movieapp.interfaces.MoviesService.BASE_API_URL;
 public class RestClient {
 
     private static MoviesService moviesService;
+    private static String nextPageToLoad = "1";
+
+    private static OkHttpClient httpClient = new OkHttpClient().newBuilder()
+            .connectTimeout(40, TimeUnit.SECONDS)
+            .addInterceptor(new Interceptor() {
+                @Override
+                public Response intercept(Chain chain) throws IOException {
+                    Request original = chain.request();
+                    HttpUrl originalHttpUrl = original.url();
+
+                    HttpUrl url = originalHttpUrl.newBuilder()
+                            .addQueryParameter("page", nextPageToLoad)
+                            .build();
+
+                    // Request customization: add request headers
+                    Request.Builder requestBuilder = original.newBuilder()
+                            .url(url);
+
+                    Request request = requestBuilder.build();
+                    return chain.proceed(request);
+
+                }
+            }).build();
 
     public static MoviesService getMoviesService() {
         if (moviesService == null) {
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(BASE_API_URL)
                     .addConverterFactory(GsonConverterFactory.create())
+                    .client(httpClient)
                     .build();
 
             moviesService = retrofit.create(MoviesService.class);
@@ -29,4 +61,16 @@ public class RestClient {
         return moviesService;
     }
 
+    public static void increaseLoadingParameter() {
+        int nextPage = Integer.parseInt(nextPageToLoad) + 1;
+        nextPageToLoad = String.valueOf(nextPage);
+    }
+
+    public static void resetLoadingParameter() {
+        nextPageToLoad = "1";
+    }
+
+    public static boolean isFirstLoad() {
+        return nextPageToLoad.equals("1");
+    }
 }

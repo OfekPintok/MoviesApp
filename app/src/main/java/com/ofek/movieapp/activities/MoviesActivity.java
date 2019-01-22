@@ -18,9 +18,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
-import com.ofek.movieapp.database.AppDatabase;
 import com.ofek.movieapp.database.DatabaseHelper;
 import com.ofek.movieapp.models.MovieModel;
 import com.ofek.movieapp.network.RestClient;
@@ -42,7 +42,7 @@ import retrofit2.Response;
 import static com.ofek.movieapp.activities.DetailsActivity.EXTRA_ITEM_POSITION;
 import static com.ofek.movieapp.models.MovieList.sMovieList;
 
-public class MoviesActivity extends AppCompatActivity implements MovieClickListener {
+public class MoviesActivity extends AppCompatActivity implements MovieClickListener, View.OnClickListener {
 
     private MoviesAdapter moviesAdapter;
     private RecyclerView mRecyclerView;
@@ -57,12 +57,29 @@ public class MoviesActivity extends AppCompatActivity implements MovieClickListe
         setSupportActionBar(myToolbar);
         progressBar = findViewById(R.id.main_progress);
 
-        //Initialize RecyclerView
+        // Initialize RecyclerView
         mRecyclerView = findViewById(R.id.movie_RecyclerView);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setHasFixedSize(true);
 
+        // Set click listeners for buttons
+        Button delButton = findViewById(R.id.main_delete_button);
+        delButton.setOnClickListener(this);
+        Button addButton = findViewById(R.id.main_add_page_button);
+        addButton.setOnClickListener(this);
+
         if (savedInstanceState == null) {
+            // Erase the data of the static movie list
+            sMovieList.clear();
+            RestClient.resetLoadingParameter();
+
+            // Load cached data
+            List<MovieModel> cachedMovies = DatabaseHelper.getDatabaseHelper(this).getAllMovies();
+
+            if (cachedMovies != null) {
+                sMovieList.addAll(cachedMovies);
+            }
+
             loadMovies();
         } else {
             moviesAdapter = new MoviesAdapter(sMovieList, this, this);
@@ -111,18 +128,15 @@ public class MoviesActivity extends AppCompatActivity implements MovieClickListe
     private void loadMovies() {
         progressBar.setVisibility(View.VISIBLE);
 
-        // Erase the data of the static movie list
-        sMovieList.clear();
-
-        List<MovieModel> cachedMovies = DatabaseHelper.getDatabaseHelper(this).getAllMovies();
-        if (cachedMovies != null) {
-            sMovieList.addAll(cachedMovies);
-        }
-
         // Create and set the adapter with the current list
         moviesAdapter =
                 new MoviesAdapter(sMovieList, MoviesActivity.this, MoviesActivity.this);
         mRecyclerView.setAdapter(moviesAdapter);
+
+        // Check if the MoviesActivity was created before or user deleted the movies list
+        if(RestClient.isFirstLoad()) {
+            sMovieList.clear();
+        }
 
         // Create a call that gets the popular movies from the API
         Call<MoviesListResponse> call = RestClient.getMoviesService().searchPopularMovies();
@@ -148,11 +162,14 @@ public class MoviesActivity extends AppCompatActivity implements MovieClickListe
                                 Toast.LENGTH_SHORT).show();
                     }
                 }
+                // Increase the counter of the next page to be loaded
+                RestClient.increaseLoadingParameter();
             }
 
             @Override
             public void onFailure(@NonNull Call<MoviesListResponse> call, @NonNull Throwable t) {
                 progressBar.setVisibility(View.GONE);
+
                 Log.i("failure", "network failure");
                 Toast.makeText(MoviesActivity.this,
                         getString(R.string.network_error),
@@ -160,5 +177,24 @@ public class MoviesActivity extends AppCompatActivity implements MovieClickListe
             }
         });
 
+    }
+
+    @Override
+    public void onClick(View v) {
+        if(v.getId() == R.id.main_delete_button) {
+            // Remove movies on background
+            DatabaseHelper.getDatabaseHelper(this).deleteAllMovies();
+
+            // Reset everything back to beginning
+            sMovieList.clear();
+            RestClient.resetLoadingParameter();
+
+            // Update the adapter
+            moviesAdapter.setData(sMovieList);
+        }
+
+        if(v.getId() == R.id.main_add_page_button) {
+            loadMovies();
+        }
     }
 }

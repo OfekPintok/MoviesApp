@@ -38,6 +38,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
 
     public MoviesAdapter (List<MovieModel> list, MovieClickListener listener , Context context) {
         mList = new ArrayList<>(list);
+        notifyDataSetChanged();
         mMovieClickListener = listener;
         mInfalter = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         picasso = Picasso.get();
