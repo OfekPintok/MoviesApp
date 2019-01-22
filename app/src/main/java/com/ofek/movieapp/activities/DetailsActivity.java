@@ -79,7 +79,9 @@ public class DetailsActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         // We won't save the current position since it would be saved after the recreation
-        fragmentStack.pop();
+        if(!fragmentStack.isEmpty()) {
+            fragmentStack.pop();
+        }
 
         int stackSize = fragmentStack.size();
         int[] scrollOrder = new int[stackSize];
