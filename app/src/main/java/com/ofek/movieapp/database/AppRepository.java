@@ -10,13 +10,13 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import com.ofek.movieapp.interfaces.MovieDao;
+import com.ofek.movieapp.interfaces.OnFinishedBackgroundTask;
 import com.ofek.movieapp.interfaces.VideoDao;
 import com.ofek.movieapp.models.MovieModel;
 import com.ofek.movieapp.models.VideoModel;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 public class AppRepository {
 
@@ -31,21 +31,10 @@ public class AppRepository {
 
     //QUERY FUNCTIONS
 
-    public List<MovieModel> getAllMovies() {
-        getAllMoviesAsyncTask moviesAsyncTask = new getAllMoviesAsyncTask(movieDao);
+    public void getAllMovies(OnFinishedBackgroundTask taskListener) {
+        getAllMoviesAsyncTask moviesAsyncTask = new getAllMoviesAsyncTask(movieDao, taskListener);
 
-        // .get waits til the task is finished, since pulling the list from db takes time
-        // and the list is needed asap
-        try {
-            moviesAsyncTask.execute().get();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        // After background task is finished, return the received movies list.
-        return moviesAsyncTask.getMoviesListFromAsyncTask();
+        moviesAsyncTask.execute();
     }
 
     public void insertAllMovies(Collection<MovieModel> movies) {
@@ -58,7 +47,6 @@ public class AppRepository {
         getVideoAsyncTask videoAsyncTask = new getVideoAsyncTask(videoDao);
         videoAsyncTask.execute(movieId);
 
-        // After background run is finished, return the received video.
         return videoAsyncTask.getVideoFromAsyncTask();
     }
 
@@ -69,23 +57,27 @@ public class AppRepository {
 
     //CLASSES
 
-    private static class getAllMoviesAsyncTask extends AsyncTask<Void, Void, Void> {
+    private static class getAllMoviesAsyncTask extends AsyncTask<Void, Void, List<MovieModel>> {
 
         MovieDao asyncMovieDao;
-        List<MovieModel> movieList;
+        OnFinishedBackgroundTask taskListener;
 
-        getAllMoviesAsyncTask(MovieDao movieDao) {
+        getAllMoviesAsyncTask(MovieDao movieDao, OnFinishedBackgroundTask listener) {
             asyncMovieDao = movieDao;
+            taskListener = listener;
         }
 
         @Override
-        protected Void doInBackground(Void... voids) {
-            movieList =  asyncMovieDao.getAll();
-            return null;
+        protected List<MovieModel> doInBackground(Void... voids) {
+            return asyncMovieDao.getAll();
         }
 
-        public List<MovieModel> getMoviesListFromAsyncTask() {
-            return movieList;
+        @Override
+        protected void onPostExecute(List<MovieModel> movieModels) {
+            super.onPostExecute(movieModels);
+
+            // After background task is finished, return the received movies list via listener;
+            taskListener.onFinishedTask(movieModels);
         }
     }
 

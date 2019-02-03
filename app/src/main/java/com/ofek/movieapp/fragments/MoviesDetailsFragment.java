@@ -19,12 +19,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ofek.movieapp.R;
-import com.ofek.movieapp.database.AppDatabase;
+import com.ofek.movieapp.activities.DownloadActivity;
 import com.ofek.movieapp.database.DatabaseHelper;
 import com.ofek.movieapp.interfaces.MoviesService;
 import com.ofek.movieapp.models.MovieModel;
@@ -88,69 +89,79 @@ public class MoviesDetailsFragment extends Fragment implements View.OnClickListe
         mBackImage = view.findViewById(R.id.fragment_imageView);
         progressBar = view.findViewById(R.id.fragment_progressBar);
 
-        Button mTrailerBtn = view.findViewById(R.id.fragment_button);
+        Button mTrailerBtn = view.findViewById(R.id.fragment_trailer_button);
         mTrailerBtn.setOnClickListener(this);
+
+        ImageButton mDownloadImg = view.findViewById(R.id.fragment_download_ibutton);
+        mDownloadImg.setOnClickListener(this);
 
         setMovieDetails(mMovieModel);
     }
 
     @Override
     public void onClick(View view) {
-        progressBar.setVisibility(View.VISIBLE);
-        if (mMovieModel == null) return;
+        if (view.getId() == R.id.fragment_trailer_button) {
+            progressBar.setVisibility(View.VISIBLE);
+            if (mMovieModel == null) return;
 
-        FragmentActivity fragmentActivity = getActivity();
-        if (fragmentActivity == null) return;
+            FragmentActivity fragmentActivity = getActivity();
+            if (fragmentActivity == null) return;
 
-        final Context context = fragmentActivity.getApplicationContext();
-        if (context == null) return;
+            final Context context = fragmentActivity.getApplicationContext();
+            if (context == null) return;
 
-        final VideoModel videoModel =
-                DatabaseHelper.getDatabaseHelper(context).getVideo(mMovieModel.getMovieId());
-        if (videoModel != null) {
-            playTrailer(videoModel.getKey());
-            return;
-        }
+            final VideoModel videoModel =
+                    DatabaseHelper.getDatabaseHelper(context).getVideo(mMovieModel.getMovieId());
+            if (videoModel != null) {
+                playTrailer(videoModel.getKey());
+                return;
+            }
 
-    Call<VideosListResponse> videoResponse =
-            RestClient.getMoviesService().getVideos(mMovieModel.getMovieId());
+            Call<VideosListResponse> videoResponse =
+                    RestClient.getMoviesService().getVideos(mMovieModel.getMovieId());
 
-    videoResponse.enqueue(new retrofit2.Callback<VideosListResponse>() {
-        @Override
-        public void onResponse(@NonNull Call<VideosListResponse> call,
-                               @NonNull Response<VideosListResponse> response) {
-            if (response.isSuccessful()) {
-                if (response.body() != null) {
-                    // Convert the response and get the video URL
-                    VideoModel convertedVideoModel = ResponseConverter.getTrailerUrl(response.body());
-                    if (convertedVideoModel != null) {
-                        DatabaseHelper.getDatabaseHelper(context).insertVideo(convertedVideoModel);
-                        playTrailer(convertedVideoModel.getKey());
+            videoResponse.enqueue(new retrofit2.Callback<VideosListResponse>() {
+                @Override
+                public void onResponse(@NonNull Call<VideosListResponse> call,
+                                       @NonNull Response<VideosListResponse> response) {
+                    if (response.isSuccessful()) {
+                        if (response.body() != null) {
+                            // Convert the response and get the video URL
+                            VideoModel convertedVideoModel = ResponseConverter.getTrailerUrl(response.body());
+                            if (convertedVideoModel != null) {
+                                DatabaseHelper.getDatabaseHelper(context).insertVideo(convertedVideoModel);
+                                playTrailer(convertedVideoModel.getKey());
+                            }
+
+                        } else {
+                            // Response is successful but doesn't contain any data
+                            Toast.makeText(getContext(),
+                                    getString(R.string.no_data_in_response),
+                                    Toast.LENGTH_SHORT).show();
+                        }
                     }
+                }
 
-                } else {
-                    // Response is successful but doesn't contain any data
+                @Override
+                public void onFailure(Call<VideosListResponse> call, Throwable t) {
+                    progressBar.setVisibility(View.GONE);
                     Toast.makeText(getContext(),
-                            getString(R.string.no_data_in_response),
+                            getString(R.string.network_error),
                             Toast.LENGTH_SHORT).show();
                 }
-            }
+            });
         }
 
-        @Override
-        public void onFailure(Call<VideosListResponse> call, Throwable t) {
-            progressBar.setVisibility(View.GONE);
-            Toast.makeText(getContext(),
-                        getString(R.string.network_error),
-                        Toast.LENGTH_SHORT).show();
+        if(view.getId() == R.id.fragment_download_ibutton) {
+            DownloadActivity.startActivity(getContext(), mMovieModel);
         }
-    });
+
     }
 
     public void setMovieDetails (MovieModel movieModel) {
         Picasso picasso = Picasso.get();
         mTitle.setText(movieModel.getTitle());
-        mReleaseDate.setText(movieModel.getReleaseDate());
+        mReleaseDate.setText(String.format("Release date: %s", movieModel.getReleaseDate()));
         mOverview.setText(movieModel.getOverview());
         picasso.load(movieModel.getBackImageUrl())
                 .into(mBackImage, new Callback() {

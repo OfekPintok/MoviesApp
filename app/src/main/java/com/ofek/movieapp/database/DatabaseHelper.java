@@ -2,11 +2,11 @@ package com.ofek.movieapp.database;
 
 import android.content.Context;
 
+import com.ofek.movieapp.interfaces.OnFinishedBackgroundTask;
 import com.ofek.movieapp.models.MovieModel;
 import com.ofek.movieapp.models.VideoModel;
 
 import java.util.Collection;
-import java.util.List;
 
 public class DatabaseHelper {
 
@@ -24,8 +24,8 @@ public class DatabaseHelper {
         return INSTANCE;
     }
 
-    public List<MovieModel> getAllMovies() {
-        return appRepository.getAllMovies();
+    public void getAllMovies(OnFinishedBackgroundTask taskListener) {
+        appRepository.getAllMovies(taskListener);
     }
 
     public void insertAllMovies(Collection<MovieModel> movies) {

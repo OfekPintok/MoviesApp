@@ -22,6 +22,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.ofek.movieapp.database.DatabaseHelper;
+import com.ofek.movieapp.interfaces.OnFinishedBackgroundTask;
 import com.ofek.movieapp.models.MovieModel;
 import com.ofek.movieapp.network.RestClient;
 import com.ofek.movieapp.interfaces.MovieClickListener;
@@ -42,12 +43,13 @@ import retrofit2.Response;
 import static com.ofek.movieapp.activities.DetailsActivity.EXTRA_ITEM_POSITION;
 import static com.ofek.movieapp.models.MovieList.sMovieList;
 
-public class MoviesActivity extends AppCompatActivity implements MovieClickListener, View.OnClickListener {
+public class MoviesActivity extends AppCompatActivity implements MovieClickListener, View.OnClickListener,
+        OnFinishedBackgroundTask {
 
     private MoviesAdapter moviesAdapter;
     private RecyclerView mRecyclerView;
     private View progressBar;
-
+    OnFinishedBackgroundTask onFinishedBackgroundTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,13 +76,7 @@ public class MoviesActivity extends AppCompatActivity implements MovieClickListe
             RestClient.resetLoadingParameter();
 
             // Load cached data
-            List<MovieModel> cachedMovies = DatabaseHelper.getDatabaseHelper(this).getAllMovies();
-
-            if (cachedMovies != null) {
-                sMovieList.addAll(cachedMovies);
-            }
-
-            loadMovies();
+            DatabaseHelper.getDatabaseHelper(this).getAllMovies(this);
         } else {
             moviesAdapter = new MoviesAdapter(sMovieList, this, this);
             mRecyclerView.setAdapter(moviesAdapter);
@@ -196,5 +192,14 @@ public class MoviesActivity extends AppCompatActivity implements MovieClickListe
         if(v.getId() == R.id.main_add_page_button) {
             loadMovies();
         }
+    }
+
+    @Override
+    public void onFinishedTask(List<MovieModel> cachedMovies) {
+        if (cachedMovies != null) {
+            sMovieList.addAll(cachedMovies);
+        }
+
+        loadMovies();
     }
 }

@@ -12,12 +12,12 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import com.ofek.movieapp.models.MovieModel;
 import com.ofek.movieapp.fragments.MoviesDetailsFragment;
 import com.ofek.movieapp.R;
 
-import java.util.ArrayList;
 import java.util.Stack;
 
 import static com.ofek.movieapp.models.MovieList.sMovieList;
