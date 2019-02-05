@@ -62,4 +62,14 @@
     <string name="movies_header">Movies App!</string>
     <string name="main_add_page_button">Add page</string>
     <string name="delete_movies_button">Delete movies!</string>
+    <string name="permission_exp_title">Permission is needed</string>
+    <string name="permission_exp_msg">In order to download this file, a permission to access your files is needed.</string>
+    <string name="permission_exp_OK">OK</string>
+    <string name="permission_exp_cancel">Close</string>
+    <string name="channel_name">Default channel</string>
+    <string name="channel_desc">channel of default notifications</string>
+    <string name="notification_progress">%d %%</string>
+    <string name="notification_title">Downloading..</string>
+    <string name="download_error">There is a problem ATM</string>
+    <string name="file_error">Can\'t create file</string>
 </resources>

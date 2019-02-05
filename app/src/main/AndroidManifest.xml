@@ -34,6 +34,9 @@
             android:name=".services.WorkOfIntentService"
             android:exported="false" />
 
+        <service android:name=".services.DownloadService"
+            android:exported="false" />
+
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />

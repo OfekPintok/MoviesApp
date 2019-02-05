@@ -75,13 +75,23 @@ public class MoviesActivity extends AppCompatActivity implements MovieClickListe
             sMovieList.clear();
             RestClient.resetLoadingParameter();
 
-            // Load cached data
+            // Load cached data. when loading complete, inform listener.
+            // @onFinishedTask will try to update the list from the server.
             DatabaseHelper.getDatabaseHelper(this).getAllMovies(this);
         } else {
             moviesAdapter = new MoviesAdapter(sMovieList, this, this);
             mRecyclerView.setAdapter(moviesAdapter);
         }
 
+    }
+
+    @Override
+    public void onFinishedTask(List<MovieModel> cachedMovies) {
+        if (cachedMovies != null) {
+            sMovieList.addAll(cachedMovies);
+        }
+        // Update the movies list if it is possible.
+        loadMovies();
     }
 
     @Override
@@ -121,6 +131,25 @@ public class MoviesActivity extends AppCompatActivity implements MovieClickListe
         startActivity(intent);
     }
 
+    @Override
+    public void onClick(View v) {
+        if(v.getId() == R.id.main_delete_button) {
+            // Remove movies on background
+            DatabaseHelper.getDatabaseHelper(this).deleteAllMovies();
+
+            // Reset everything back to beginning
+            sMovieList.clear();
+            RestClient.resetLoadingParameter();
+
+            // Update the adapter
+            moviesAdapter.setData(sMovieList);
+        }
+
+        if(v.getId() == R.id.main_add_page_button) {
+            loadMovies();
+        }
+    }
+
     private void loadMovies() {
         progressBar.setVisibility(View.VISIBLE);
 
@@ -128,11 +157,6 @@ public class MoviesActivity extends AppCompatActivity implements MovieClickListe
         moviesAdapter =
                 new MoviesAdapter(sMovieList, MoviesActivity.this, MoviesActivity.this);
         mRecyclerView.setAdapter(moviesAdapter);
-
-        // Check if the MoviesActivity was created before or user deleted the movies list
-        if(RestClient.isFirstLoad()) {
-            sMovieList.clear();
-        }
 
         // Create a call that gets the popular movies from the API
         Call<MoviesListResponse> call = RestClient.getMoviesService().searchPopularMovies();
@@ -145,6 +169,10 @@ public class MoviesActivity extends AppCompatActivity implements MovieClickListe
                 progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful()) {
                     if (response.body() != null) {
+                        // Check if the MoviesActivity was created before or user deleted the movies list
+                        if(RestClient.isFirstLoad()) {
+                            sMovieList.clear();
+                        }
                         // Add all the converted results into the list
                         sMovieList.addAll(ResponseConverter.movieResponseConvert(response.body()));
                         // Re-set the movie list
@@ -173,33 +201,5 @@ public class MoviesActivity extends AppCompatActivity implements MovieClickListe
             }
         });
 
-    }
-
-    @Override
-    public void onClick(View v) {
-        if(v.getId() == R.id.main_delete_button) {
-            // Remove movies on background
-            DatabaseHelper.getDatabaseHelper(this).deleteAllMovies();
-
-            // Reset everything back to beginning
-            sMovieList.clear();
-            RestClient.resetLoadingParameter();
-
-            // Update the adapter
-            moviesAdapter.setData(sMovieList);
-        }
-
-        if(v.getId() == R.id.main_add_page_button) {
-            loadMovies();
-        }
-    }
-
-    @Override
-    public void onFinishedTask(List<MovieModel> cachedMovies) {
-        if (cachedMovies != null) {
-            sMovieList.addAll(cachedMovies);
-        }
-
-        loadMovies();
     }
 }
