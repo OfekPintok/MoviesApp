@@ -12,7 +12,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 import com.ofek.movieapp.models.MovieModel;
 import com.ofek.movieapp.fragments.MoviesDetailsFragment;
@@ -29,6 +28,7 @@ public class DetailsActivity extends AppCompatActivity {
     public static final String EXTRA_STACK_STATE = "extra.stack-state";
     private ViewPager mViewPager;
     private Stack<Integer> fragmentStack;
+
 
 
     @Override
@@ -65,13 +65,13 @@ public class DetailsActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onPageSelected(int i) {
+            public void onPageSelected(int i)
+            {
                 fragmentStack.push(i);
             }
 
             @Override
             public void onPageScrollStateChanged(int i) {
-
             }
         });
     }
@@ -100,8 +100,12 @@ public class DetailsActivity extends AppCompatActivity {
         if(fragmentStack.size() > 1) {
             fragmentStack.pop();
         }
-            // Set the previous item as the current item
+
+        // Set the previous item as the current item
+        if(!fragmentStack.isEmpty()) {
             mViewPager.setCurrentItem(fragmentStack.pop());
+        }
+
         if (fragmentStack.isEmpty()) {
             // If the stack is currently empty, allow the system to handle the
             // Back button. This calls finish() on this activity and pops the back stack.
