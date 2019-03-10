@@ -21,7 +21,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.ofek.movieapp.database.DatabaseHelper;
+import com.ofek.movieapp.database.DatabaseCore;
 import com.ofek.movieapp.interfaces.OnFinishedBackgroundTask;
 import com.ofek.movieapp.models.MovieModel;
 import com.ofek.movieapp.network.RestClient;
@@ -49,7 +49,6 @@ public class MoviesActivity extends AppCompatActivity implements MovieClickListe
     private MoviesAdapter moviesAdapter;
     private RecyclerView mRecyclerView;
     private View progressBar;
-    OnFinishedBackgroundTask onFinishedBackgroundTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +76,7 @@ public class MoviesActivity extends AppCompatActivity implements MovieClickListe
 
             // Load cached data. when loading complete, inform listener.
             // @onFinishedTask will try to update the list from the server.
-            DatabaseHelper.getDatabaseHelper(this).getAllMovies(this);
+            DatabaseCore.getAllMovies(this, this);
         } else {
             moviesAdapter = new MoviesAdapter(sMovieList, this, this);
             mRecyclerView.setAdapter(moviesAdapter);
@@ -135,7 +134,7 @@ public class MoviesActivity extends AppCompatActivity implements MovieClickListe
     public void onClick(View v) {
         if(v.getId() == R.id.main_delete_button) {
             // Remove movies on background
-            DatabaseHelper.getDatabaseHelper(this).deleteAllMovies();
+            DatabaseCore.deleteAllMovies(this);
 
             // Reset everything back to beginning
             sMovieList.clear();
@@ -158,48 +157,6 @@ public class MoviesActivity extends AppCompatActivity implements MovieClickListe
                 new MoviesAdapter(sMovieList, MoviesActivity.this, MoviesActivity.this);
         mRecyclerView.setAdapter(moviesAdapter);
 
-        // Create a call that gets the popular movies from the API
-        Call<MoviesListResponse> call = RestClient.getMoviesService().searchPopularMovies();
-
-        // Enqueue the call
-        call.enqueue(new Callback<MoviesListResponse>() {
-            @Override
-            public void onResponse(@NonNull Call<MoviesListResponse> call,
-                                   @NonNull Response<MoviesListResponse> response) {
-                progressBar.setVisibility(View.GONE);
-                if (response.isSuccessful()) {
-                    if (response.body() != null) {
-                        // Check if the MoviesActivity was created before or user deleted the movies list
-                        if(RestClient.isFirstLoad()) {
-                            sMovieList.clear();
-                        }
-                        // Add all the converted results into the list
-                        sMovieList.addAll(ResponseConverter.movieResponseConvert(response.body()));
-                        // Re-set the movie list
-                        moviesAdapter.setData(sMovieList);
-                        // Erase old data from db and replace it with the new one
-                        DatabaseHelper.getDatabaseHelper(MoviesActivity.this).deleteAllMovies();
-                        DatabaseHelper.getDatabaseHelper(MoviesActivity.this).insertAllMovies(sMovieList);
-                    } else {
-                        Toast.makeText(MoviesActivity.this,
-                                getString(R.string.no_data_in_response),
-                                Toast.LENGTH_SHORT).show();
-                    }
-                }
-                // Increase the counter of the next page to be loaded
-                RestClient.increaseLoadingParameter();
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<MoviesListResponse> call, @NonNull Throwable t) {
-                progressBar.setVisibility(View.GONE);
-
-                Log.i("failure", "network failure");
-                Toast.makeText(MoviesActivity.this,
-                        getString(R.string.network_error),
-                        Toast.LENGTH_SHORT).show();
-            }
-        });
 
     }
 }
