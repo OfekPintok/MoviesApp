@@ -157,6 +157,46 @@ public class MoviesActivity extends AppCompatActivity implements MovieClickListe
                 new MoviesAdapter(sMovieList, MoviesActivity.this, MoviesActivity.this);
         mRecyclerView.setAdapter(moviesAdapter);
 
+        // Create a call that gets the popular movies from the API
+        Call<MoviesListResponse> call = RestClient.getMoviesService().searchPopularMovies();
 
+        // Enqueue the call
+        call.enqueue(new Callback<MoviesListResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<MoviesListResponse> call,
+                                   @NonNull Response<MoviesListResponse> response) {
+                if (response.isSuccessful()) {
+                    if (response.body() != null) {
+                        // Check if the MoviesActivity was created before or user deleted the movies list
+                        if (RestClient.isFirstLoad()) {
+                            sMovieList.clear();
+                        }
+                        // Add all the converted results into the list
+                        sMovieList.addAll(ResponseConverter.movieResponseConvert(response.body()));
+                        // Re-set the movie list
+                        moviesAdapter.setData(sMovieList);
+                        // Erase old data from db and replace it with the new one
+                        DatabaseCore.deleteAllMovies(MoviesActivity.this);
+                        DatabaseCore.insertAllMovies(MoviesActivity.this, sMovieList);
+                    } else {
+                        Toast.makeText(MoviesActivity.this,
+                                getString(R.string.no_data_in_response),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+                // Increase the counter of the next page to be loaded
+                RestClient.increaseLoadingParameter();
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<MoviesListResponse> call, @NonNull Throwable t) {
+                progressBar.setVisibility(View.GONE);
+
+                Log.i("failure", "network failure");
+                Toast.makeText(MoviesActivity.this,
+                        getString(R.string.network_error),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
