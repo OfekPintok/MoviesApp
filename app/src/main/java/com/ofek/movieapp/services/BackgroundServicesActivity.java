@@ -37,8 +37,8 @@ public class BackgroundServicesActivity extends AppCompatActivity implements Vie
         setContentView(R.layout.activity_background_services);
 
         // Get reference for the buttons
-        Button startIntentService = (Button) findViewById(R.id.button_start_intent_service);
-        Button startService = (Button) findViewById(R.id.button_start_service);
+        Button startIntentService = findViewById(R.id.button_start_intent_service);
+        Button startService = findViewById(R.id.button_start_service);
 
         // Set onClickListener events for the buttons
         startIntentService.setOnClickListener(this);
@@ -47,9 +47,6 @@ public class BackgroundServicesActivity extends AppCompatActivity implements Vie
 
     @Override
     public void onClick(View view) {
-      //  Intent intentOfIntentService = new Intent(this, WorkOfIntentService.class);
-      //  Intent intentOfService = new Intent(this, WorkOfService.class);
-
         if (view.getId() == R.id.button_start_intent_service) {
             if(mIsServiceStarted) {
                 stopService(new Intent(this, WorkOfService.class));
@@ -110,7 +107,7 @@ public class BackgroundServicesActivity extends AppCompatActivity implements Vie
         @Override
         public void onReceive(Context context, Intent intent) {
             // Get reference to the progress TextView and update it
-            TextView progressPercent = (TextView) findViewById(R.id.tv_progress_percent);
+            TextView progressPercent = findViewById(R.id.tv_progress_percent);
 
             // Receive the progress value
             int progress = intent.getIntExtra(PROGRESS_VALUE_KEY, -1);

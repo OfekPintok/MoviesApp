@@ -4,7 +4,7 @@
  * Last modified 1/14/19 2:49 PM
  */
 
-package com.ofek.movieapp.interfaces;
+package com.ofek.movieapp.database;
 
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;

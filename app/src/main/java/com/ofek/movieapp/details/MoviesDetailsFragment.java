@@ -4,7 +4,7 @@
  * Last modified 1/14/19 7:41 PM
  */
 
-package com.ofek.movieapp.fragments;
+package com.ofek.movieapp.details;
 
 import android.content.Context;
 import android.content.Intent;
@@ -22,22 +22,15 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.ofek.movieapp.repo.AppRepository;
 import com.ofek.movieapp.R;
-import com.ofek.movieapp.activities.DownloadActivity;
-import com.ofek.movieapp.database.DatabaseCore;
-import com.ofek.movieapp.interfaces.MoviesService;
+import com.ofek.movieapp.download.DownloadActivity;
+import com.ofek.movieapp.repo.Listener;
+import com.ofek.movieapp.network.MoviesService;
 import com.ofek.movieapp.models.MovieModel;
-import com.ofek.movieapp.models.VideoModel;
-import com.ofek.movieapp.network.ResponseConverter;
-import com.ofek.movieapp.network.RestClient;
-import com.ofek.movieapp.models.VideosListResponse;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
-
-import retrofit2.Call;
-import retrofit2.Response;
 
 public class MoviesDetailsFragment extends Fragment implements View.OnClickListener {
 
@@ -48,14 +41,16 @@ public class MoviesDetailsFragment extends Fragment implements View.OnClickListe
     private TextView mReleaseDate;
     private TextView mOverview;
     private ImageView mBackImage;
-    private View progressBar;
+    private View mProgressBar;
 
     public MoviesDetailsFragment() {
-
+        // Requires empty constructor.
     }
 
     public static MoviesDetailsFragment newInstance(MovieModel movieModel) {
         MoviesDetailsFragment moviesDetailsFragment = new MoviesDetailsFragment();
+
+        // Save current movie for lifecycle's awareness
         Bundle bundle = new Bundle();
         bundle.putParcelable(BUNDLE_MOVIE, movieModel);
         moviesDetailsFragment.setArguments(bundle);
@@ -82,12 +77,12 @@ public class MoviesDetailsFragment extends Fragment implements View.OnClickListe
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Get reference to the views
+        // Get reference of views
         mTitle = view.findViewById(R.id.fragment_title);
         mReleaseDate = view.findViewById(R.id.fragment_release_date);
         mOverview = view.findViewById(R.id.fragment_overview);
         mBackImage = view.findViewById(R.id.fragment_imageView);
-        progressBar = view.findViewById(R.id.fragment_progressBar);
+        mProgressBar = view.findViewById(R.id.fragment_progressBar);
 
         Button mTrailerBtn = view.findViewById(R.id.fragment_trailer_button);
         mTrailerBtn.setOnClickListener(this);
@@ -99,9 +94,11 @@ public class MoviesDetailsFragment extends Fragment implements View.OnClickListe
     }
 
     @Override
+    // Fragment's click event handlers
     public void onClick(View view) {
+        // Trailer button click event
         if (view.getId() == R.id.fragment_trailer_button) {
-            progressBar.setVisibility(View.VISIBLE);
+            showLoading();
             if (mMovieModel == null) return;
 
             FragmentActivity fragmentActivity = getActivity();
@@ -110,48 +107,20 @@ public class MoviesDetailsFragment extends Fragment implements View.OnClickListe
             final Context context = fragmentActivity.getApplicationContext();
             if (context == null) return;
 
-            final VideoModel videoModel =
-                    DatabaseCore.getVideo(context, mMovieModel.getMovieId());
-            if (videoModel != null) {
-                playTrailer(videoModel.getKey());
-                return;
-            }
-
-            Call<VideosListResponse> videoResponse =
-                    RestClient.getMoviesService().getVideos(mMovieModel.getMovieId());
-
-            videoResponse.enqueue(new retrofit2.Callback<VideosListResponse>() {
+            AppRepository.getVideos(context, mMovieModel.getMovieId(), new Listener<String>() {
                 @Override
-                public void onResponse(@NonNull Call<VideosListResponse> call,
-                                       @NonNull Response<VideosListResponse> response) {
-                    if (response.isSuccessful()) {
-                        if (response.body() != null) {
-                            // Convert the response and get the video URL
-                            VideoModel convertedVideoModel = ResponseConverter.getTrailerUrl(response.body());
-                            if (convertedVideoModel != null) {
-                                DatabaseCore.insertVideo(context, convertedVideoModel);
-                                playTrailer(convertedVideoModel.getKey());
-                            }
+                public void onSuccess(String key) {
+                    playTrailer(key);
+                }
+                @Override
+                public void onFailure(String e) {
 
-                        } else {
-                            // Response is successful but doesn't contain any data
-                            Toast.makeText(getContext(),
-                                    getString(R.string.no_data_in_response),
-                                    Toast.LENGTH_SHORT).show();
                         }
-                    }
-                }
+                });
 
-                @Override
-                public void onFailure(Call<VideosListResponse> call, Throwable t) {
-                    progressBar.setVisibility(View.GONE);
-                    Toast.makeText(getContext(),
-                            getString(R.string.network_error),
-                            Toast.LENGTH_SHORT).show();
-                }
-            });
         }
 
+        // Download Button Click Event
         if(view.getId() == R.id.fragment_download_ibutton) {
             DownloadActivity.startActivity(getContext(), mMovieModel);
         }
@@ -159,10 +128,13 @@ public class MoviesDetailsFragment extends Fragment implements View.OnClickListe
     }
 
     public void setMovieDetails (MovieModel movieModel) {
-        Picasso picasso = Picasso.get();
+        // Set relevant text
         mTitle.setText(movieModel.getTitle());
         mReleaseDate.setText(String.format("Release date: %s", movieModel.getReleaseDate()));
         mOverview.setText(movieModel.getOverview());
+
+        // Load image with Picasso
+        Picasso picasso = Picasso.get();
         picasso.load(movieModel.getBackImageUrl())
                 .into(mBackImage, new Callback() {
                     @Override
@@ -181,7 +153,15 @@ public class MoviesDetailsFragment extends Fragment implements View.OnClickListe
         String trailerUrl = MoviesService.YOUTUBE_URL + key;
         Intent browser = new Intent(Intent.ACTION_VIEW, Uri.parse(trailerUrl));
         startActivity(browser);
-        progressBar.setVisibility(View.GONE);
+        hideLoading();
+    }
+
+    private void showLoading() {
+        mProgressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void hideLoading() {
+        mProgressBar.setVisibility(View.GONE);
     }
 
 }

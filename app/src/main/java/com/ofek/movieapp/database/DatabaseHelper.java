@@ -9,16 +9,15 @@ package com.ofek.movieapp.database;
 import android.content.Context;
 import android.os.AsyncTask;
 
-import com.ofek.movieapp.interfaces.MovieDao;
-import com.ofek.movieapp.interfaces.OnFinishedBackgroundTask;
-import com.ofek.movieapp.interfaces.VideoDao;
+import com.ofek.movieapp.repo.OnMovieBackgroundTask;
+import com.ofek.movieapp.repo.OnVideoBackgroundTask;
 import com.ofek.movieapp.models.MovieModel;
 import com.ofek.movieapp.models.VideoModel;
 
 import java.util.Collection;
 import java.util.List;
 
-public class DatabaseHelper {
+class DatabaseHelper {
 
     private static DatabaseHelper INSTANCE;
 
@@ -31,7 +30,7 @@ public class DatabaseHelper {
         this.videoDao = db.videoDao();
     }
 
-    public static DatabaseHelper getDatabaseHelper(Context context) {
+    static DatabaseHelper getDatabaseHelper(Context context) {
         if(INSTANCE == null) {
             INSTANCE = new DatabaseHelper(context);
         }
@@ -40,26 +39,25 @@ public class DatabaseHelper {
 
     //QUERY FUNCTIONS
 
-    public void getAllMovies(OnFinishedBackgroundTask taskListener) {
+    void getAllMovies(OnMovieBackgroundTask taskListener) {
         getAllMoviesAsyncTask moviesAsyncTask = new getAllMoviesAsyncTask(movieDao, taskListener);
 
         moviesAsyncTask.execute();
     }
 
-    public void insertAllMovies(Collection<MovieModel> movies) {
+    void insertAllMovies(Collection<MovieModel> movies) {
         new insertAllMoviesAsyncTask(movieDao).execute(movies);
     }
 
-    public void deleteAllMovies() { new deleteAllMoviesAsyncTask(movieDao).execute(); }
+    void deleteAllMovies() { new deleteAllMoviesAsyncTask(movieDao).execute(); }
 
-    public VideoModel getVideo(Integer movieId) {
-        getVideoAsyncTask videoAsyncTask = new getVideoAsyncTask(videoDao);
+    void getVideo(Integer movieId, OnVideoBackgroundTask taskListener) {
+        getVideoAsyncTask videoAsyncTask = new getVideoAsyncTask(videoDao, taskListener);
+
         videoAsyncTask.execute(movieId);
-
-        return videoAsyncTask.getVideoFromAsyncTask();
     }
 
-    public void insertVideo(VideoModel videoModel){
+    void insertVideo(VideoModel videoModel){
         new insertVideoAsyncTask(videoDao).execute(videoModel);
     }
 
@@ -69,9 +67,9 @@ public class DatabaseHelper {
     private static class getAllMoviesAsyncTask extends AsyncTask<Void, Void, List<MovieModel>> {
 
         MovieDao asyncMovieDao;
-        OnFinishedBackgroundTask taskListener;
+        OnMovieBackgroundTask taskListener;
 
-        getAllMoviesAsyncTask(MovieDao movieDao, OnFinishedBackgroundTask listener) {
+        getAllMoviesAsyncTask(MovieDao movieDao, OnMovieBackgroundTask listener) {
             asyncMovieDao = movieDao;
             taskListener = listener;
         }
@@ -122,25 +120,28 @@ public class DatabaseHelper {
         }
     }
 
-    private static class getVideoAsyncTask extends AsyncTask<Integer, Void, Void> {
+    private static class getVideoAsyncTask extends AsyncTask<Integer, Void, VideoModel> {
 
         VideoDao asyncVideoDao;
-        VideoModel videoModel;
+        OnVideoBackgroundTask taskListener;
 
-        getVideoAsyncTask(VideoDao videoDao) {
+        getVideoAsyncTask(VideoDao videoDao, OnVideoBackgroundTask taskListener) {
             asyncVideoDao = videoDao;
+            this.taskListener = taskListener;
         }
 
         @Override
-        protected Void doInBackground(Integer... movieId) {
-            videoModel = asyncVideoDao.getVideo(movieId[0]);
-            return null;
+        protected VideoModel doInBackground(Integer... movieId) {
+            return asyncVideoDao.getVideo(movieId[0]);
         }
 
-        public VideoModel getVideoFromAsyncTask() {
-            return videoModel;
-        }
+        @Override
+        protected void onPostExecute(VideoModel videoModel) {
+            super.onPostExecute(videoModel);
 
+            // After background task is finished, return the received movies list via listener;
+            taskListener.onFinishedTask(videoModel);
+        }
     }
 
     private static class insertVideoAsyncTask extends AsyncTask<VideoModel, Void, Void> {

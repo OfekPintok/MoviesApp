@@ -10,9 +10,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 
-import com.ofek.movieapp.interfaces.IAsyncTaskEvents;
-
-public class MyCustomAsyncTask {
+class MyCustomAsyncTask {
 
     private volatile boolean mCancelled = false;
     private Thread mBackgroundThread;
@@ -26,14 +24,14 @@ public class MyCustomAsyncTask {
     /**
      * Runs on the UI thread before {@link #doInBackground}.
      */
-    protected void onPreExecute() {
+    private void onPreExecute() {
         mIAsyncTaskEvents.onPreExecuteI();
     }
 
     /**
      * Runs on new thread after {@link #onPreExecute()} and before {@link #onPostExecute()}.
      */
-    protected void doInBackground(int toBeCounted) {
+    private void doInBackground(int toBeCounted) {
         for(int i = toBeCounted; i <= 10; i++ ) {
             if (isCancelled()) {
                 return;
@@ -46,35 +44,29 @@ public class MyCustomAsyncTask {
     /**
      * Runs on the UI thread after {@link #doInBackground}
      */
-    protected void onPostExecute(){
+    private void onPostExecute(){
         mIAsyncTaskEvents.onPostExecuteI();
     }
 
     /**
      * @param toBeCounted is clearly the integer that holds the number of the counts.
      */
-    public void execute(final int toBeCounted) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                // The first step of the execution
-                onPreExecute();
-                mBackgroundThread = new Thread("Handler_executor_thread") {
-                    @Override
-                    public void run() {
-                        // The second step of the execution
-                        doInBackground(toBeCounted);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                // The third step of the execution
-                                onPostExecute();
-                            }
-                        });
-                    }
-                };
-                mBackgroundThread.start();
-            }
+    void execute(final int toBeCounted) {
+        runOnUiThread(() -> {
+            // The first step of the execution
+            onPreExecute();
+            mBackgroundThread = new Thread("Handler_executor_thread") {
+                @Override
+                public void run() {
+                    // The second step of the execution
+                    doInBackground(toBeCounted);
+                    runOnUiThread(() -> {
+                        // The third step of the execution
+                        onPostExecute();
+                    });
+                }
+            };
+            mBackgroundThread.start();
         });
     }
 
@@ -82,7 +74,7 @@ public class MyCustomAsyncTask {
     /**
      * onProgressUpdate connects the thread's updated work with the UI.
      */
-    protected void onProgressUpdate (Integer progress) {
+    private void onProgressUpdate(Integer progress) {
         mIAsyncTaskEvents.onProgressUpdateI(progress);
     }
 
@@ -99,16 +91,11 @@ public class MyCustomAsyncTask {
      * and let it have the progress parameter
      * @param progress is the current parameter to be sent to the UI thread.
      */
-    protected void publishProgress(final int progress) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                onProgressUpdate(progress);
-            }
-        });
+    private void publishProgress(final int progress) {
+        runOnUiThread(() -> onProgressUpdate(progress));
     }
 
-    public void cancel() {
+    void cancel() {
         mCancelled = true;
         if (mBackgroundThread != null) {
             mBackgroundThread.interrupt();
@@ -116,7 +103,7 @@ public class MyCustomAsyncTask {
         mIAsyncTaskEvents.onCancelI();
     }
 
-    public boolean isCancelled() {
+    boolean isCancelled() {
         return mCancelled;
     }
 }

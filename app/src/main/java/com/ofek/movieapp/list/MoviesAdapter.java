@@ -4,9 +4,8 @@
  * Last modified 1/14/19 7:39 PM
  */
 
-package com.ofek.movieapp.adapters;
+package com.ofek.movieapp.list;
 
-import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
@@ -19,7 +18,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.ofek.movieapp.R;
-import com.ofek.movieapp.interfaces.MovieClickListener;
 import com.ofek.movieapp.models.MovieModel;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
@@ -27,31 +25,30 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.ofek.movieapp.models.MovieList.sMovieList;
-
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder> implements Parcelable {
 
-    private List<MovieModel> mList;
-    private LayoutInflater mInfalter;
+    private final List<MovieModel> mMoviesList;
     private MovieClickListener mMovieClickListener;
-    private Picasso picasso;
+    private Picasso mPicasso;
 
-    public MoviesAdapter (List<MovieModel> list, MovieClickListener listener , Context context) {
-        mList = new ArrayList<>(list);
+    MoviesAdapter(List<MovieModel> list, MovieClickListener listener) {
+        mMoviesList = new ArrayList<>(list);
         notifyDataSetChanged();
         mMovieClickListener = listener;
-        mInfalter = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        picasso = Picasso.get();
+        mPicasso = Picasso.get();
     }
 
-    public void setData (List <MovieModel> movies) {
-        mList.clear();
-        mList.addAll(movies);
+    List<MovieModel> getData() {
+        return mMoviesList;
+    }
+
+    void clearData() {
+        mMoviesList.clear();
         notifyDataSetChanged();
     }
 
-    protected MoviesAdapter(Parcel in) {
-        mList = in.createTypedArrayList(MovieModel.CREATOR);
+    private MoviesAdapter(Parcel in) {
+        mMoviesList = in.createTypedArrayList(MovieModel.CREATOR);
     }
 
     public static final Creator<MoviesAdapter> CREATOR = new Creator<MoviesAdapter>() {
@@ -69,19 +66,20 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
     @NonNull
     @Override
     public MoviesAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-       View view =  mInfalter.inflate(R.layout.item_new_movie, viewGroup, false);
+       View view =  LayoutInflater.from(viewGroup.getContext())
+               .inflate(R.layout.item_new_movie, viewGroup, false);
        return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull MoviesAdapter.ViewHolder viewHolder, int i) {
-        //viewHolder holds a single line in the Recycler view
-          viewHolder.bind(mList.get(i));
+        //viewHolder holds a single row of the Recycler view
+          viewHolder.bind(mMoviesList.get(i));
     }
 
     @Override
     public int getItemCount() {
-        return mList.size();
+        return mMoviesList.size();
     }
 
     @Override
@@ -91,16 +89,16 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeTypedList(mList);
+        parcel.writeTypedList(mMoviesList);
     }
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        public final ImageView movieImage;
-        public final TextView titleTv;
-        public final TextView overviewTv;
+        final ImageView movieImage;
+        final TextView titleTv;
+        final TextView overviewTv;
 
-        public ViewHolder(@NonNull View itemView) {
+        ViewHolder(@NonNull View itemView) {
             super(itemView);
             // Hold the elements of each movie in the Recycler view
             movieImage = itemView.findViewById(R.id.movie_image);
@@ -109,9 +107,9 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
             itemView.setOnClickListener(this);
         }
 
-        public void bind(MovieModel movieModel) {
+        void bind(MovieModel movieModel) {
             // Set the data inside the fields
-            picasso.load(movieModel.getImageUrl())
+            mPicasso.load(movieModel.getImageUrl())
                     .into(movieImage, new Callback() {
                         @Override
                         public void onSuccess() {

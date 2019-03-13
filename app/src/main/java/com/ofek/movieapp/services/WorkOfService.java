@@ -20,7 +20,7 @@ import com.ofek.movieapp.R;
 
 public class WorkOfService extends Service {
 
-    private boolean isDestroyed;
+    private boolean mIsDestroyed;
     private static final String TAG = "WorkOfService";
     private ServiceHandler mServiceHandler;
 
@@ -43,7 +43,7 @@ public class WorkOfService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        isDestroyed = false;
+        mIsDestroyed = false;
         showToast(getString(R.string.service_started));
         // call a new service handler. The service ID can be used to identify the service
         Message message = mServiceHandler.obtainMessage();
@@ -62,13 +62,13 @@ public class WorkOfService extends Service {
     /* Custom Handler class for handling services */
     private final class ServiceHandler extends Handler {
 
-        public ServiceHandler(Looper looper) {
+        ServiceHandler(Looper looper) {
             super(looper);
         }
 
         @Override
         public void handleMessage(Message msg) {
-            for(int i = 0; i <= 100 && !isDestroyed; i++) {
+            for(int i = 0; i <= 100 && !mIsDestroyed; i++) {
                 // We'll calling mServiceHandler.sendMessage(message);
                 // this method will be called from onStartCommand.
                 SystemClock.sleep(100);
@@ -85,7 +85,7 @@ public class WorkOfService extends Service {
 
     @Override
     public void onDestroy() {
-        isDestroyed = true;
+        mIsDestroyed = true;
         super.onDestroy();
     }
 }

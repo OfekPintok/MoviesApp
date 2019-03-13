@@ -6,8 +6,6 @@
 
 package com.ofek.movieapp.network;
 
-import com.ofek.movieapp.interfaces.MoviesService;
-
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
@@ -19,7 +17,7 @@ import okhttp3.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-import static com.ofek.movieapp.interfaces.MoviesService.BASE_API_URL;
+import static com.ofek.movieapp.network.MoviesService.BASE_API_URL;
 
 public class RestClient {
 
@@ -28,28 +26,26 @@ public class RestClient {
 
     private static OkHttpClient httpClient = new OkHttpClient().newBuilder()
             .connectTimeout(40, TimeUnit.SECONDS)
-            .addInterceptor(new Interceptor() {
-                @Override
-                public Response intercept(Chain chain) throws IOException {
-                    Request original = chain.request();
-                    HttpUrl originalHttpUrl = original.url();
+            .addInterceptor(chain -> {
+                Request original = chain.request();
+                HttpUrl originalHttpUrl = original.url();
 
-                    HttpUrl url = originalHttpUrl.newBuilder()
-                            .addQueryParameter("page", nextPageToLoad)
-                            .build();
+                HttpUrl url = originalHttpUrl.newBuilder()
+                        .addQueryParameter("page", nextPageToLoad)
+                        .build();
 
-                    // Request customization: add request headers
-                    Request.Builder requestBuilder = original.newBuilder()
-                            .url(url);
+                // Request customization: add request headers
+                Request.Builder requestBuilder = original.newBuilder()
+                        .url(url);
 
-                    Request request = requestBuilder.build();
-                    return chain.proceed(request);
+                Request request = requestBuilder.build();
+                return chain.proceed(request);
 
-                }
             }).build();
 
-    public static MoviesService getMoviesService() {
+    static MoviesService getMoviesService() {
         if (moviesService == null) {
+            // Build Retrofit client
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(BASE_API_URL)
                     .addConverterFactory(GsonConverterFactory.create())
@@ -61,7 +57,7 @@ public class RestClient {
         return moviesService;
     }
 
-    public static void increaseLoadingParameter() {
+    static void increaseLoadingParameter() {
         int nextPage = Integer.parseInt(nextPageToLoad) + 1;
         nextPageToLoad = String.valueOf(nextPage);
     }

@@ -1,4 +1,4 @@
-package com.ofek.movieapp.services;
+package com.ofek.movieapp.download;
 
 import android.app.Activity;
 import android.app.Notification;
@@ -17,7 +17,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.ofek.movieapp.R;
-import com.ofek.movieapp.activities.DownloadActivity;
 import com.ofek.movieapp.threads.DownloadThread;
 
 public class DownloadService extends Service {

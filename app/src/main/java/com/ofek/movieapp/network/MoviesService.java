@@ -4,7 +4,7 @@
  * Last modified 1/5/19 4:38 PM
  */
 
-package com.ofek.movieapp.interfaces;
+package com.ofek.movieapp.network;
 
 import com.ofek.movieapp.models.MoviesListResponse;
 import com.ofek.movieapp.models.VideosListResponse;

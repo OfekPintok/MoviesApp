@@ -4,7 +4,7 @@
  * Last modified 12/4/18 6:51 PM
  */
 
-package com.ofek.movieapp.interfaces;
+package com.ofek.movieapp.threads;
 
 public interface IAsyncTaskEvents {
 

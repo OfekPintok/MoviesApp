@@ -4,7 +4,7 @@
  * Last modified 12/1/18 2:01 AM
  */
 
-package com.ofek.movieapp.interfaces;
+package com.ofek.movieapp.list;
 
 public interface MovieClickListener {
 

@@ -13,9 +13,8 @@ import android.arch.persistence.room.InvalidationTracker;
 import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
+import android.support.annotation.NonNull;
 
-import com.ofek.movieapp.interfaces.MovieDao;
-import com.ofek.movieapp.interfaces.VideoDao;
 import com.ofek.movieapp.models.MovieModel;
 import com.ofek.movieapp.models.VideoModel;
 
@@ -24,13 +23,13 @@ public abstract class AppDatabase extends RoomDatabase {
 
     private static AppDatabase INSTANCE;
 
-    public static final String DATABASE_NAME = "Movies";
+    private static final String DATABASE_NAME = "Movies";
 
     public abstract MovieDao movieDao();
 
     public abstract VideoDao videoDao();
 
-    public static AppDatabase getInstance(Context context) {
+    static AppDatabase getInstance(Context context) {
         if (INSTANCE == null) {
             INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                     AppDatabase.class, DATABASE_NAME)
@@ -40,11 +39,13 @@ public abstract class AppDatabase extends RoomDatabase {
     return INSTANCE;
     }
 
+    @NonNull
     @Override
     protected SupportSQLiteOpenHelper createOpenHelper(DatabaseConfiguration config) {
         return null;
     }
 
+    @NonNull
     @Override
     protected InvalidationTracker createInvalidationTracker() {
         return null;

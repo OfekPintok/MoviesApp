@@ -1,4 +1,4 @@
-package com.ofek.movieapp.activities;
+package com.ofek.movieapp.download;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
@@ -20,7 +20,6 @@ import android.widget.ImageView;
 
 import com.ofek.movieapp.R;
 import com.ofek.movieapp.models.MovieModel;
-import com.ofek.movieapp.services.DownloadService;
 
 public class DownloadActivity extends AppCompatActivity {
 
@@ -28,14 +27,14 @@ public class DownloadActivity extends AppCompatActivity {
     public static final String PERMISSION = Manifest.permission.WRITE_EXTERNAL_STORAGE;
     public static final int PERMISSIONS_REQUEST_CODE = 1;
     public static final String ARG_FILE_PATH = "extra.arg_file_path";
-    private BroadcastReceiver broadcastReceiver;
+    private BroadcastReceiver mBroadcastReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_download);
 
-        broadcastReceiver = new BroadcastReceiver() {
+        mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String filePath = intent.getStringExtra(ARG_FILE_PATH);
@@ -62,12 +61,12 @@ public class DownloadActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         IntentFilter intentFilter = new IntentFilter(DownloadService.BROADCAST_ACTION);
-        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, intentFilter);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver, intentFilter);
     }
 
     @Override
     protected void onStop() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
         super.onStop();
     }
 

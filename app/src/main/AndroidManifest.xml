@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:allowBackup="true"
@@ -12,9 +13,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activities.DownloadActivity"></activity>
+        <activity android:name=".download.DownloadActivity" />
         <activity
-            android:name=".activities.MoviesActivity"
+            android:name=".list.MoviesActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,7 +23,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.DetailsActivity" />
+        <activity android:name=".details.DetailsActivity" />
         <activity android:name=".threads.AsyncTaskActivity" />
         <activity android:name=".threads.ThreadsHandlerActivity" />
         <activity android:name=".services.BackgroundServicesActivity" />
@@ -34,7 +35,7 @@
             android:name=".services.WorkOfIntentService"
             android:exported="false" />
 
-        <service android:name=".services.DownloadService"
+        <service android:name=".download.DownloadService"
             android:exported="false" />
 
         <meta-data

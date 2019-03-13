@@ -11,12 +11,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
 import com.ofek.movieapp.R;
-import com.ofek.movieapp.fragments.ThreadFragment;
-import com.ofek.movieapp.interfaces.IAsyncTaskEvents;
 
 public class ThreadsHandlerActivity extends AppCompatActivity implements IAsyncTaskEvents {
 
-    private ThreadFragment threadFragment;
+    private ThreadFragment mThreadFragment;
     private MyCustomAsyncTask myCustomAsyncTask;
     final static private String BUNDLE_CURRENT_COUNT = "BUNDLE_CURRENT_COUNT";
 
@@ -26,15 +24,15 @@ public class ThreadsHandlerActivity extends AppCompatActivity implements IAsyncT
         setContentView(R.layout.activity_asynctask);
 
         if (savedInstanceState == null) {
-            // Create new threadFragment fragment
-            threadFragment = new ThreadFragment();
+            // Create new mThreadFragment fragment
+            mThreadFragment = new ThreadFragment();
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.asynctask_layout, threadFragment)
+                    .replace(R.id.asynctask_layout, mThreadFragment)
                     .commit();
         } else {
-            if (threadFragment == null) {
-                threadFragment =
+            if (mThreadFragment == null) {
+                mThreadFragment =
                         (ThreadFragment) getSupportFragmentManager().findFragmentById(R.id.asynctask_layout);
             }
             if (myCustomAsyncTask == null) {
@@ -43,7 +41,7 @@ public class ThreadsHandlerActivity extends AppCompatActivity implements IAsyncT
             String currentS = savedInstanceState.getString(BUNDLE_CURRENT_COUNT);
             if (currentS != null) {
                 if (currentS.equals(getString(R.string.done_counting)) || currentS.equals(getString(R.string.thread_start_msg))) {
-                    threadFragment.updateTextView(currentS);
+                    mThreadFragment.updateTextView(currentS);
                 } else {
                     myCustomAsyncTask.execute(Integer.valueOf(currentS));
                 }
@@ -54,14 +52,14 @@ public class ThreadsHandlerActivity extends AppCompatActivity implements IAsyncT
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        String toKeep = threadFragment.getCountString();
+        String toKeep = mThreadFragment.getCountString();
         outState.putString(BUNDLE_CURRENT_COUNT, toKeep);
     }
 
 
     @Override
     public void onPreExecuteI() {
-        threadFragment.updateTextView("");
+        mThreadFragment.updateTextView("");
     }
 
     @Override
@@ -70,14 +68,14 @@ public class ThreadsHandlerActivity extends AppCompatActivity implements IAsyncT
             if (myCustomAsyncTask.isCancelled()) {
                 myCustomAsyncTask = null;
             } else {
-                threadFragment.updateTextView(getString(R.string.done_counting));
+                mThreadFragment.updateTextView(getString(R.string.done_counting));
             }
         }
     }
 
     @Override
     public void onProgressUpdateI(Integer integer) {
-        threadFragment.updateTextView(integer.toString());
+        mThreadFragment.updateTextView(integer.toString());
     }
 
     @Override

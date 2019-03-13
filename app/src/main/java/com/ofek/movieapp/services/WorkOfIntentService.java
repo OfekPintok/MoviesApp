@@ -15,7 +15,7 @@ import com.ofek.movieapp.R;
 
 public class WorkOfIntentService extends IntentService {
 
-    private boolean isDestroyed;
+    private boolean mIsDestroyed;
     private static final String TAG = "WorkOfIntentService";
 
     public WorkOfIntentService() {
@@ -24,9 +24,9 @@ public class WorkOfIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        isDestroyed = false;
+        mIsDestroyed = false;
         showToast(getString(R.string.service_started));
-        for(int i = 0; i <= 100 && !isDestroyed; i++) {
+        for(int i = 0; i <= 100 && !mIsDestroyed; i++) {
             SystemClock.sleep(100);
             Intent broadcastIntent =
                     new Intent(BackgroundServicesActivity.BackgroundProgressReceiver.PROGRESS_UPDATE_ACTION);
@@ -46,7 +46,7 @@ public class WorkOfIntentService extends IntentService {
 
     @Override
     public void onDestroy() {
-        isDestroyed = true;
+        mIsDestroyed = true;
         super.onDestroy();
     }
 }

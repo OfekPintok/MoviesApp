@@ -13,12 +13,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
 import com.ofek.movieapp.R;
-import com.ofek.movieapp.fragments.ThreadFragment;
-import com.ofek.movieapp.interfaces.IAsyncTaskEvents;
 
 public class AsyncTaskActivity extends AppCompatActivity implements IAsyncTaskEvents {
 
-    private ThreadFragment threadFragment;
+    private ThreadFragment mThreadFragment;
     private CounterAsyncTask counterAsyncTask;
     final static private String BUNDLE_CURRENT_COUNT = "BUNDLE_CURRENT_COUNT";
 
@@ -29,16 +27,16 @@ public class AsyncTaskActivity extends AppCompatActivity implements IAsyncTaskEv
 
         if (savedInstanceState == null) {
         // Create new threadFragment fragment
-        threadFragment = new ThreadFragment();
+        mThreadFragment = new ThreadFragment();
 
         getSupportFragmentManager().
                 beginTransaction().
-                replace(R.id.asynctask_layout, threadFragment)
+                replace(R.id.asynctask_layout, mThreadFragment)
                 .commit();
 
         } else {
-            if(threadFragment == null) {
-                threadFragment =
+            if(mThreadFragment == null) {
+                mThreadFragment =
                         (ThreadFragment) getSupportFragmentManager().findFragmentById(R.id.asynctask_layout);
             }
             if (counterAsyncTask == null) {
@@ -48,7 +46,7 @@ public class AsyncTaskActivity extends AppCompatActivity implements IAsyncTaskEv
             String currentS = savedInstanceState.getString(BUNDLE_CURRENT_COUNT);
             if (currentS != null) {
                 if (currentS.equals(getString(R.string.done_counting)) || currentS.equals(getString(R.string.thread_start_msg))) {
-                    threadFragment.updateTextView(currentS);
+                    mThreadFragment.updateTextView(currentS);
                     } else {
                     counterAsyncTask.execute(Integer.valueOf(currentS));
                 }
@@ -59,7 +57,7 @@ public class AsyncTaskActivity extends AppCompatActivity implements IAsyncTaskEv
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(BUNDLE_CURRENT_COUNT, threadFragment.getCountString());
+        outState.putString(BUNDLE_CURRENT_COUNT, mThreadFragment.getCountString());
     }
 
     // When clicking on Create
@@ -103,7 +101,7 @@ public class AsyncTaskActivity extends AppCompatActivity implements IAsyncTaskEv
     // Before executing the task
     @Override
     public void onPreExecuteI() {
-        threadFragment.updateTextView("");
+        mThreadFragment.updateTextView("");
     }
 
     // After executing the task
@@ -113,7 +111,7 @@ public class AsyncTaskActivity extends AppCompatActivity implements IAsyncTaskEv
             if (!counterAsyncTask.isCancelled()) {
                 counterAsyncTask = new CounterAsyncTask(this);
             } else {
-                threadFragment.updateTextView(getString(R.string.done_counting));
+                mThreadFragment.updateTextView(getString(R.string.done_counting));
             }
         }
     }
@@ -121,7 +119,7 @@ public class AsyncTaskActivity extends AppCompatActivity implements IAsyncTaskEv
     // While execute is on the run
     @Override
     public void onProgressUpdateI(Integer toCount) {
-        threadFragment.updateTextView(String.valueOf(toCount));
+        mThreadFragment.updateTextView(String.valueOf(toCount));
     }
 
     @Override
@@ -132,7 +130,7 @@ public class AsyncTaskActivity extends AppCompatActivity implements IAsyncTaskEv
         }
     }
 
-    // When task's destroyed
+    // When task is destroyed
     @Override
     protected void onDestroy() {
         if (counterAsyncTask != null) {
@@ -150,7 +148,7 @@ public class AsyncTaskActivity extends AppCompatActivity implements IAsyncTaskEv
 
         private IAsyncTaskEvents mIAsyncTaskEvents;
 
-        public CounterAsyncTask (IAsyncTaskEvents iAsyncTaskEvents) {
+        CounterAsyncTask(IAsyncTaskEvents iAsyncTaskEvents) {
             this.mIAsyncTaskEvents = iAsyncTaskEvents;
         }
 

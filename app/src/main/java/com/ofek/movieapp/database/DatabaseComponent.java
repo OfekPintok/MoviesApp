@@ -2,15 +2,16 @@ package com.ofek.movieapp.database;
 
 import android.content.Context;
 
-import com.ofek.movieapp.interfaces.OnFinishedBackgroundTask;
+import com.ofek.movieapp.repo.OnMovieBackgroundTask;
+import com.ofek.movieapp.repo.OnVideoBackgroundTask;
 import com.ofek.movieapp.models.MovieModel;
 import com.ofek.movieapp.models.VideoModel;
 
 import java.util.Collection;
 
-public class DatabaseCore {
+public class DatabaseComponent {
 
-    public static void getAllMovies(Context context,OnFinishedBackgroundTask taskListener) {
+    public static void getAllMovies(Context context, OnMovieBackgroundTask taskListener) {
         DatabaseHelper.getDatabaseHelper(context).getAllMovies(taskListener);
     }
 
@@ -22,8 +23,8 @@ public class DatabaseCore {
         DatabaseHelper.getDatabaseHelper(context).deleteAllMovies();
     }
 
-    public static VideoModel getVideo(Context context, Integer movieId) {
-        return DatabaseHelper.getDatabaseHelper(context).getVideo(movieId);
+    public static void getVideo(Context context, Integer movieId, OnVideoBackgroundTask taskListener) {
+        DatabaseHelper.getDatabaseHelper(context).getVideo(movieId, taskListener);
     }
 
     public static void insertVideo(Context context, VideoModel videoModel) {

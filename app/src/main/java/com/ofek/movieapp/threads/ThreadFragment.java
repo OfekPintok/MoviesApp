@@ -4,7 +4,7 @@
  * Last modified 12/9/18 7:40 AM
  */
 
-package com.ofek.movieapp.fragments;
+package com.ofek.movieapp.threads;
 
 import android.app.Activity;
 import android.content.Context;
@@ -19,13 +19,12 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.ofek.movieapp.R;
-import com.ofek.movieapp.interfaces.IAsyncTaskEvents;
 
 
 public class ThreadFragment extends Fragment implements View.OnClickListener {
 
-    private TextView countTv;
-    private IAsyncTaskEvents iAsyncTaskEvents;
+    private TextView mCountTv;
+    private IAsyncTaskEvents mIAsyncTaskEvents;
     final private static String BUNDLE_CURRENT_COUNT = "BUNDLE_CURRENT_COUNT";
 
     public ThreadFragment () {
@@ -36,10 +35,10 @@ public class ThreadFragment extends Fragment implements View.OnClickListener {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_thread, container, false);
 
-        Button createBtn = (Button) view.findViewById(R.id.thread_create),
-                startBtn = (Button) view.findViewById(R.id.thread_start),
-                cancelBtn = (Button) view.findViewById(R.id.thread_cancel);
-        countTv = (TextView) view.findViewById(R.id.thread_request_msg);
+        Button createBtn = view.findViewById(R.id.thread_create),
+                startBtn = view.findViewById(R.id.thread_start),
+                cancelBtn = view.findViewById(R.id.thread_cancel);
+        mCountTv = view.findViewById(R.id.thread_request_msg);
 
         createBtn.setOnClickListener(this);
         startBtn.setOnClickListener(this);
@@ -47,7 +46,7 @@ public class ThreadFragment extends Fragment implements View.OnClickListener {
 
         if(savedInstanceState != null) {
             String currentCount = savedInstanceState.getString(BUNDLE_CURRENT_COUNT);
-            countTv.setText(currentCount);
+            mCountTv.setText(currentCount);
         }
 
         return view;
@@ -56,7 +55,7 @@ public class ThreadFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        String currentCount = countTv.getText().toString();
+        String currentCount = mCountTv.getText().toString();
         outState.putString(BUNDLE_CURRENT_COUNT, currentCount);
     }
 
@@ -69,7 +68,7 @@ public class ThreadFragment extends Fragment implements View.OnClickListener {
         Activity hostActivity = getActivity();
 
         if (hostActivity instanceof IAsyncTaskEvents) {
-            iAsyncTaskEvents = (IAsyncTaskEvents)hostActivity;
+            mIAsyncTaskEvents = (IAsyncTaskEvents)hostActivity;
         }
     }
 
@@ -77,39 +76,39 @@ public class ThreadFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onDetach() {
         super.onDetach();
-        iAsyncTaskEvents = null;
+        mIAsyncTaskEvents = null;
     }
 
 
     @Override
     public void onClick(View view) {
 
-        if(iAsyncTaskEvents == null) {
+        if(mIAsyncTaskEvents == null) {
             return;
         }
 
         switch (view.getId()) {
             case (R.id.thread_create):
-                iAsyncTaskEvents.createAsyncTaskI();
+                mIAsyncTaskEvents.createAsyncTaskI();
                 break;
 
             case (R.id.thread_start):
-                iAsyncTaskEvents.startAsyncTaskI();
+                mIAsyncTaskEvents.startAsyncTaskI();
                 break;
 
             case (R.id.thread_cancel):
-                iAsyncTaskEvents.cancelAsyncTaskI();
+                mIAsyncTaskEvents.cancelAsyncTaskI();
                 break;
         }
     }
 
     public void updateTextView(String toUpdate) {
-        if (toUpdate != null && countTv != null) {
-            countTv.setText(toUpdate);
+        if (toUpdate != null && mCountTv != null) {
+            mCountTv.setText(toUpdate);
         }
     }
 
     public String getCountString () {
-        return countTv.getText().toString();
+        return mCountTv.getText().toString();
     }
 }
