@@ -23,7 +23,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".details.DetailsActivity" />
+        <activity
+            android:name=".details.DetailsActivity"
+            android:parentActivityName="com.ofek.movieapp.list.MoviesActivity" >
+        <meta-data
+            android:name="android.support.PARENT_ACTIVITY"
+            android:value="com.ofek.movieapp.list.MoviesActivity" />
+        </activity>
         <activity android:name=".threads.AsyncTaskActivity" />
         <activity android:name=".threads.ThreadsHandlerActivity" />
         <activity android:name=".services.BackgroundServicesActivity" />

@@ -156,7 +156,7 @@ public class AsyncTaskActivity extends AppCompatActivity implements IAsyncTaskEv
         protected String doInBackground(Integer... integers) {
             int currentCount = 0;
             if (integers.length == 1) { // One digit
-                currentCount = integers[0].intValue(); // Get value of the digit
+                currentCount = integers[0]; // Get value of the digit
             } else {
                 currentCount = 10; // Max number to count is 10
             }
