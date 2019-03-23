@@ -59,7 +59,7 @@
     <string name="Done">Done!</string>
     <string name="network_error">Please check your internet connection</string>
     <string name="no_data_in_response">Nothing to show ATM..</string>
-    <string name="movies_header">Movies App!</string>
+    <string name="movies_header">Welcome to MovieApp!</string>
     <string name="main_add_page_button">Add page</string>
     <string name="delete_movies_button">Delete movies!</string>
     <string name="permission_exp_title">Permission is needed</string>
